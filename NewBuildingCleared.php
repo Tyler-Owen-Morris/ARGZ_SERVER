@@ -17,7 +17,7 @@ if(isset($_POST['id'])){
     //This is a lookup to find matching currently clear entries
     $query1 = mysql_query("SELECT id FROM cleared_buildings WHERE id='$id' AND bldg_id ='$bldg_id' AND active='false'")or die(mysql_error());
         
-    elseif(mysql_num_rows($query1) > 0) {
+    if(mysql_num_rows($query1) > 0) {
         //if there is an entry matching user and building, that is already in a deactivated state
         echo "This building has already been cleared by the user";
         
