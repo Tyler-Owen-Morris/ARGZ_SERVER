@@ -5,7 +5,8 @@
         $id = protect($_POST['id']);
         
         $usrqry = "SELECT * FROM survivor_roster WHERE owner_id = '$id'";
-        $survivordata = mysql_query($usrqry);
+        $survivordata = mysql_query($usrqry) or die(mysql_error());
+        $return_array = array();
         
         //echo "The raw sql query returned: " + $userdata;
         $survivordataarr = array();
@@ -17,7 +18,10 @@
             $jsondata = json_encode($survivordataarr, JSON_NUMERIC_CHECK);
             echo $jsondata;
         } else {
-            echo "json did not encode. sql returned less than 1 result";
+            array_push($return_array, "Failed");
+            array_push($return_array, "no survivors found");
+            $json_return = json_encode($return_array);
+            echo $json_return;
         }
         
     } else {
