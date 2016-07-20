@@ -6,8 +6,8 @@
 
 $returnArray = array();
 
-if(isset($_POST['id'])){
-    $id = protect($_POST['id']);
+if(isset($_POST['owner_id'])){
+    $id = protect($_POST['owner_id']);
     $survivor_id = protect($_POST['survivor_id']);
     $name = protect($_POST['name']);
     $base_stam = protect($_POST['base_stam']);

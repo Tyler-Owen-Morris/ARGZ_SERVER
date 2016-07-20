@@ -11,9 +11,9 @@ if (isset($_POST['id'])) {
             $lon = protect($_POST['lon']);
 
             //update the player sheet with the new coordinates
-            $update1 = mysql_query("UPDATE user_sheet SET homebase_lat = '$lat', homebase_lon = '$lon' WHERE id = '$id'")or die(mysql_error());
+            $update1 = mysql_query("UPDATE player_sheet SET homebase_lat = '$lat', homebase_lon = '$lon' WHERE '$id' = id")or die(mysql_error());
             //check to make sure there is a homebase_sheet entry for the player (otherwise we will make a new one)
-            $query1 = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id") or die(msql_error());
+            $query1 = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
             if (mysql_num_rows($query1) == 1 ) {
                 //we have found the players homebase
                 array_push($returnArray, "Success");
@@ -22,10 +22,9 @@ if (isset($_POST['id'])) {
                 echo $jsonReturn;
             } else if (mysql_num_rows($query1) < 1) {
                 //there is no entry for this players homebase
-                $query2 = mysql_query("SELECT * FROM user_sheet WHERE id='$id'");
+                $query2 = mysql_query("SELECT * FROM player_sheet WHERE id='$id'");
                 $user_data = mysql_fetch_assoc($query2);
-                $inactive_survivors = ($user_data['total_survivors'] - $user_data['active_survivors']);
-                $insert1 = mysql_query("INSERT INTO homebase_sheet (id, supply, knife_for_pickup, club_for_pickup, ammo_for_pickup, gun_for_pickup, active_survivor_for_pickup, inactive_survivors) VALUES ('$id', 0, 0, 0, 0, 0, 0, '$inactive_survivors')) WHERE id='$id'") or die(mysql_error());
+                $insert1 = mysql_query("INSERT INTO homebase_sheet (id, supply, knife_for_pickup, club_for_pickup, ammo_for_pickup, gun_for_pickup, active_survivor_for_pickup, inactive_survivors) VALUES ('$id', 0, 0, 0, 0, 0, 0, 0)") or die(mysql_error());
                 array_push($returnArray, "Success");
                 array_push($returnArray, "Player homebase location updated, and homebase has been initialized");
                 $jsonReturn = json_encode($returnArray);

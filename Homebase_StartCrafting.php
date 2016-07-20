@@ -50,7 +50,6 @@ if ($id <> '') {
     echo "Player ID not set";
 }
 
-
 // include("db_connect.php");
 
 // $return_array = array();

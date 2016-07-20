@@ -4,21 +4,30 @@
     if (isset($_POST['id'])) {
         $id = protect($_POST['id']);
         
-        $usrqry = "SELECT * FROM user_sheet WHERE id = '$id'";
+        $usrqry = "SELECT * FROM player_sheet WHERE id = '$id'";
         $userdata = mysql_query($usrqry);
         
-        //echo "The raw sql query returned: " + $userdata;
+        $return_array = array();
         
-        if (mysql_num_rows($userdata) > 0 && mysql_num_rows($userdata) < 2) {
+        if (mysql_num_rows($userdata) == 1) {
             
             while ($row = mysql_fetch_assoc($userdata)) {
-                $userdataarr = array("id" => $row['id'], "first_name" => $row['first_name'], "last_name" => $row['last_name'], "total_survivors" => $row['total_survivors'], "active_survivors" => $row['active_survivors'], "char_created_DateTime" => $row['char_created_DateTime'], "homebase_lat" => $row['homebase_lat'], "homebase_lon" => $row['homebase_lon'], "last_player_current_health" => $row['last_player_current_health'], "supply" => $row['supply'], "water" => $row['water'], "food" => $row['food'], "meals" => $row['meals'], "knife_count" => $row['knife_count'], "club_count" => $row['club_count'], "gun_count" => $row['gun_count'], "knife_durability" => $row['knife_durability'], "club_durability" => $row['club_durability']);
-                $jsondata = json_encode($userdataarr, JSON_NUMERIC_CHECK);
-                
+                $userdataarr = array("id" => $row['id'], "first_name" => $row['first_name'], "last_name" => $row['last_name'], "char_created_DateTime" => $row['char_created_DateTime'], "homebase_lat" => $row['homebase_lat'], "homebase_lon" => $row['homebase_lon'], "supply" => $row['supply'], "water" => $row['water'], "food" => $row['food'], "ammo" => $row['ammo'], "equipped_weapon_id" => $row['equipped_weapon_id'], "curr_stamina" => $row['curr_stamina'], "max_stamina" => $row['max_stamina']);
+                array_push($return_array, "Success");
+                array_push($return_array, $userdataarr);
+                $jsondata = json_encode($return_array, JSON_NUMERIC_CHECK);
                 echo $jsondata;
             }
+        } else if (mysql_num_rows($userdata) == 0) {
+            array_push($return_array, "Failed");
+            array_push($return_array, "User has not started a character");
+            $jsondata = json_encode($return_array, JSON_NUMERIC_CHECK);
+            echo $jsondata;
         } else {
-            echo "json did not encode. sql returned more or less than 1 result";
+            array_push($return_array, "Failed");
+            array_push($return_array, "More than one entry for the same user");
+            $jsondata = json_encode($return_array, JSON_NUMERIC_CHECK);
+            echo $jsondata;
         }
         
     } else {

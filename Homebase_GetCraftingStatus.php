@@ -30,7 +30,7 @@ if (isset($_POST['id'])){
     }
     
     $completed_array = array();
-    //expire any completed weapons and add them to the homebase_sheet for the same user
+    //expire any completed weapons and add them to the active_weapons for the same user
     if (mysql_num_rows($query2) > 0) {
         while ($weapon = mysql_fetch_assoc($query2)) {
             $entry_id = $weapon['entry_id'];
@@ -41,7 +41,7 @@ if (isset($_POST['id'])){
             //remove the expired entry from the crafting database
             $delete1 = mysql_query("DELETE FROM weapon_crafting WHERE entry_id='$entry_id' AND id='$id'") or die(mysql_error());
 
-            //this adds one to the correct weapon type on the homebase_sheet
+            //this adds one to the correct weapon type on the active_weapons sheet
             if ($type == "knife"){
                 $update1 = mysql_query("UPDATE homebase_sheet SET knife_for_pickup = knife_for_pickup+1 WHERE id='$id'") or die(mysql_error());
                 array_push($completed_array, "knife");
