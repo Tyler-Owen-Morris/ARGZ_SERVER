@@ -11,7 +11,7 @@ if(isset($_POST['id'])){
 
     if (mysql_num_rows($weapon_data) > 0) {
         while ($weapon = mysql_fetch_assoc($weapon_data)) {
-            array_push($wepDataArr, array("weapon_id" => $weapon['weapon_id'], "owner_id" => $weapon['owner_id'], "equipped_id" => $weapon['equipped_id'], "type" => $weapon['type'], "name" => $weapon['name'], "stam_cost" => $weapon['stam_cost'] ,"base_dmg" => $weapon['base_dmg'], "top_dmg" => $weapon['top_dmg'], "bot_dmg" => $weapon['bot_dmg'], "durability" => $weapon['durability']));
+            array_push($wepDataArr, array("weapon_id" => $weapon['weapon_id'], "owner_id" => $weapon['owner_id'], "equipped_id" => $weapon['equipped_id'], "type" => $weapon['type'], "name" => $weapon['name'], "stam_cost" => $weapon['stam_cost'] ,"base_dmg" => $weapon['base_dmg'], "modifier" => $weapon['modifier'], "durability" => $weapon['durability']));
         }
         array_push($return_array, "Success");
         array_push($return_array, $wepDataArr);

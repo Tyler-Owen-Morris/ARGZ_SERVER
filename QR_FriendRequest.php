@@ -19,6 +19,10 @@ if(isset($_POST['request_id'])){
         $usrqry2 = "SELECT * FROM user_sheet WHERE id = '$request_id'";
         $requesting_user_data = mysql_query($usrqry2) or die(mysql_error());
 
+        //find the survivor card for each player that represets the player
+        $accepting_survivor_game_data = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND team_position='1' LIMIT 1") or die(mysql_error());
+        $requsting_survivor_game_data = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND team_position='1' LIMIT 1") or die(mysql_error());
+
         if(mysql_num_rows($query1) > 0 || mysql_num_rows($query2) > 0) {
 			//echo "found a matching entry, processing </br>";
             //if the two have paired up before, then update the date on the entry.
@@ -50,9 +54,44 @@ if(isset($_POST['request_id'])){
                     }
 				}
 			}
-            //***************************
-            //This will also need to update the player data with rewards for the two.  The return should also update the UI to reflect the added stats or inventory items.
-            //***************************
+
+            //locate the existing matching pair
+            $accept_survivor_on_requster = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_query());
+            $request_survivor_on_accepter = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_query());
+
+            //if entries are found, then update them, otherwise create new entries. since it is possible that the survivor has died, and thus been deleted.
+            if (mysql_num_rows($accept_survivor_on_requster) > 0) {
+                //verifying that there is ONLY 1 entry
+                if (mysql_num_rows($accept_survivor_on_requster) < 2){
+                    $row1 = mysql_fetch_assoc($accept_survivor_on_requster);
+                    $survivor_entry_id = $row1['entry_id'];
+                    $survivor_stamina = $row1['base_stam'];
+                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
+                }
+            } else {
+                //no match found- insert a new entry 
+                $row2 = mysql_fetch_assoc($accepting_survivor_game_data);
+                $name = $row2['name'];
+                $base_stam = $row2['base_stam'];
+                $base_attack = $row2['base_attack'];
+                $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$request_id', '$name', '$base_stam', '$base_stam', '$base_attack', 1, '0', '0', '$accept_id')") or die(mysql_error());
+            }
+            if (mysql_num_rows($request_survivor_on_accepter) > 0) {
+                //verifying that there is ONLY 1 entry
+                if (mysql_num_rows($request_survivor_on_accepter) < 2){
+                    $row1 = mysql_fetch_assoc($request_survivor_on_accepter);
+                    $survivor_entry_id = $row1['entry_id'];
+                    $survivor_stamina = $row1['base_stam'];
+                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
+                }
+            } else {
+                //no match found- insert a new entry
+                $row4 = mysql_fetch_assoc($requsting_survivor_game_data);
+                $name1 = $row4['name'];
+                $base_stam1 = $row4['base_stam'];
+                $base_attack1 = $row4['base_attack'];
+                $insert3 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$accept_id', '$name1', '$base_stam1', '$base_stam1', '$base_attack1', 1, '0', '0', '$request_id'") or die(mysql_query());
+            }
             
         } else {
             //otherwise- create an entire new pair.
@@ -66,6 +105,44 @@ if(isset($_POST['request_id'])){
                 array_push($returnArray, $userarray);
                 $json_return = json_encode($returnArray);
                 echo $json_return;
+            }
+
+             //locate the existing matching pair
+            $accept_survivor_on_requster = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_query());
+            $request_survivor_on_accepter = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_query());
+
+            //if entries are found, then update them, otherwise create new entries. since it is possible that the survivor has died, and thus been deleted.
+            if (mysql_num_rows($accept_survivor_on_requster) > 0) {
+                //verifying that there is ONLY 1 entry
+                if (mysql_num_rows($accept_survivor_on_requster) < 2){
+                    $row1 = mysql_fetch_assoc($accept_survivor_on_requster);
+                    $survivor_entry_id = $row1['entry_id'];
+                    $survivor_stamina = $row1['base_stam'];
+                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
+                }
+            } else {
+                //no match found- insert a new entry 
+                $row2 = mysql_fetch_assoc($accepting_survivor_game_data);
+                $name = $row2['name'];
+                $base_stam = $row2['base_stam'];
+                $base_attack = $row2['base_attack'];
+                $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$request_id', '$name', '$base_stam', '$base_stam', '$base_attack', 1, '0', '0', '$accept_id')") or die(mysql_error());
+            }
+            if (mysql_num_rows($request_survivor_on_accepter) > 0) {
+                //verifying that there is ONLY 1 entry
+                if (mysql_num_rows($request_survivor_on_accepter) < 2){
+                    $row1 = mysql_fetch_assoc($request_survivor_on_accepter);
+                    $survivor_entry_id = $row1['entry_id'];
+                    $survivor_stamina = $row1['base_stam'];
+                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
+                }
+            } else {
+                //no match found- insert a new entry
+                $row4 = mysql_fetch_assoc($requsting_survivor_game_data);
+                $name1 = $row4['name'];
+                $base_stam1 = $row4['base_stam'];
+                $base_attack1 = $row4['base_attack'];
+                $insert3 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$accept_id', '$name1', '$base_stam1', '$base_stam1', '$base_attack1', 1, '0', '0', '$request_id'") or die(mysql_query());
             }
         }
     } else {

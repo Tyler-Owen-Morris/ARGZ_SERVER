@@ -4,7 +4,7 @@
     if (isset($_POST['id'])) {
         $id = protect($_POST['id']);
         
-        $usrqry = "SELECT * FROM survivor_roster WHERE owner_id = '$id' ORDER BY team_position ASC";
+        $usrqry = "SELECT * FROM survivor_roster WHERE owner_id = '$id' ORDER BY team_position DESC";
         $survivordata = mysql_query($usrqry) or die(mysql_error());
         $return_array = array();
         

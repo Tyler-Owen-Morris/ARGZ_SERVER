@@ -8,6 +8,7 @@ if(isset($_POST['id'])){
     $id = protect($_POST['id']);
     $first_name = protect($_POST['first_name']);
     $last_name = protect($_POST['last_name']);
+    $name = protect($_POST['name']);
     
     $supply = protect($_POST['supply']);
     $water = protect($_POST['water']);
@@ -16,6 +17,7 @@ if(isset($_POST['id'])){
     $ammo = protect($_POST['ammo']);
     
     $stamina = 100;
+    $attack = 15;
     $home_lat = 10.1234;
     $home_lon = 10.1234;
     //$daytime_now = date('MySQL');
@@ -56,6 +58,9 @@ if(isset($_POST['id'])){
         //6) Reset all QR friendships
         $delete5 = mysql_query("DELETE FROM qr_pairs WHERE id_1='$id' OR id_2='$id'") or die(mysql_error());
 
+        //After DELTES are complete- create the survivor entry for the player character at team position 5
+        $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, paired_user_id) VALUES ('$id', '$name', '$stamina', '$stamina', '$attack', '0', '1', NOW(), '5', '$id')") or die(mysql_error());
+
         echo "Success";
 
     } else {
@@ -85,6 +90,9 @@ if(isset($_POST['id'])){
 
         //6) Reset all QR friendships
         $delete5 = mysql_query("DELETE FROM qr_pairs WHERE id_1='$id' OR id_2='$id'") or die(mysql_error());
+
+         //After DELTES are complete- create the survivor entry for the player character at team position 5
+        $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, paired_user_id) VALUES ('$id', '$name', '$stamina', '$stamina', '$attack', '0', '1', NOW(), '5', '$id')") or die(mysql_error());
     }
 }
 

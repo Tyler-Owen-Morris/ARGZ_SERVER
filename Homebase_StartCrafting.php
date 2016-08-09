@@ -1,15 +1,16 @@
 <?php
 include("db_connect.php");
 
-$returnArray = array();
+$return_array = array();
 
 $id = isset($_POST['id']) ? protect($_POST['id']) : '';
-$type = isset($_POST['type']) ? protect($_POST['type']) : '';
+$wep_name = isset($_POST['wep_name']) ? protect($_POST['wep_name']) : '';
 $cost = isset($_POST['cost']) ? protect($_POST['cost']) : '';
 $duration = isset($_POST['duration']) ? protect($_POST['duration']) : '';
+$index = isset($_POST['weapon_index']) ? protect($_POST['weapon_index']) : '';
 
 if ($id <> '') {
-    if($type <> '') {
+    if($wep_name <> '') {
 
     //I would rather see this:
     // $weapon = mysql_query("SELECT * from weapon_list WHERE type=$type") or die(mysql_error());
@@ -24,7 +25,7 @@ if ($id <> '') {
     if(mysql_affected_rows() > 0) {
         $start = 'now()'; // simply use the mysql function
 
-        //find all other weapons from this user that haven't been completed
+        //find the last weapon from this user that haven't been completed
         $query1 = mysql_query("SELECT time_complete FROM weapon_crafting WHERE time_complete > NOW() AND id='$id' ORDER BY time_complete DESC LIMIT 1") or die(mysql_error());
 
         if (mysql_num_rows($query1) > 0) {
@@ -32,23 +33,32 @@ if ($id <> '') {
             $row = mysql_fetch_assoc($query1);
             $start = "'".$row['time_complete']."'"; // we just need to add quotes around it...
         }
+
         $interval_string = "interval $duration minute";
-        $insert1 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete) VALUES ('$id', '$type', '$duration', date_add($start, $interval_string ))") or die(mysql_error());
-                
-        $returnArray = array('Success', 'Weapon added to craft cue');
-        $jsonReturn = json_encode($returnArray);
-        echo $jsonReturn;
+        $insert1 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', '$wep_name', '$duration', date_add($start, $interval_string), '$index')") or die(mysql_error());
+        if(mysql_affected_rows() > 0 ){        
+            array_push($return_array, "Success");
+            array_push($return_array, "weapon added to craft cue");
+        } else {
+            array_push($return_array, "Failed");
+            array_push($return_array, "failed to add the weapon to the crafting DB");
+        }
+        
     }else{
-        $returnArray = array('Failed', 'type of weapon not sent');
-        $jsonReturn = json_encode($returnArray);
-        echo $jsonReturn;
+        array_push ($return_array, "Failed");
+        array_push ($return_array, "player does not have enough supply");
     }
     } else {
-        echo "Weapon Type not set";
+       array_push ($return_array, "Failed");
+        array_push ($return_array, "wepon name not set");
     }
 } else {
-    echo "Player ID not set";
+    array_push ($return_array, "Failed");
+    array_push ($return_array, "player ID not set");
 }
+
+$jsonReturn = json_encode($return_array);
+echo $jsonReturn;
 
 // include("db_connect.php");
 

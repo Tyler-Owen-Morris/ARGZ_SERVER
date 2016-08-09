@@ -1,7 +1,7 @@
 <?php
 include("db_connect.php");
 $return_array = array();
-
+$weapon_string = "";
 if (isset($_POST['id'])) {
     $id = protect($_POST['id']);
 
@@ -14,29 +14,40 @@ if (isset($_POST['id'])) {
     if (mysql_num_rows($weaponquery1) > 0) {
         while ($weapon = mysql_fetch_assoc($weaponquery1)) {
             $entry_id = $weapon['entry_id'];
-            $type = $weapon['type'];
-            $duration = $weapon['duration'];
-            $time_complete = strtotime($weapon['time_complete']);
+            $wep_name = $weapon['wep_name'];
+            $index = $weapon['weapon_index'];//this corresponds to it's index on the static table for crafted weapon templates
+            
+            //index 0 means that it's ammunition
+            if ($index != 0 ) {
+                //get static weapon to construct from
+                $static_weapon_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id='$index' LIMIT 1") or die(mysql_error());
+                $weapon_data = mysql_fetch_assoc($static_weapon_query);
+                $weapon_name = $weapon_data['name'];
+                $weapon_type = $weapon_data['type'];
+                $weapon_modifier = $weapon_data['modifier'];
+                $weapon_base_dmg = $weapon_data['base_dmg'];
+                $weapon_durability = $weapon_data['durability'];
+                $weapon_stam_cost = $weapon_data['stam_cost'];
+
+                $weapon_string += " found expired: "+$wep_name;
+
+                //create the crafted weapon into active inventory
+                //check if we need to add ammo or an actual weapon
+            
+                $insert = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability) values ('$id', 0, '$weapon_name', '$weapon_type', '$weapon_stam_cost', '$weapon_base_dmg', '$weapon_modifier', '$weapon_durability')") or die(mysql_error());
+                $weapon_string += " creating weapon record";
+            } else {
+                //increment the players ammo up by 1
+                $ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+1 WHERE id = '$id'") or die(mysql_error());
+                $weapon_string += " adding ammo";
+            }
+           // $insert = mysql_query("INSERT into active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability) SELECT '$id' as owner_id, '0' as equipped_id, name, type, stam_cost, base_dmg, modifier, durability from static_weapons_classes where type='$type'") or die(mysql_error());
 
             //remove the expired entry from the crafting database
             $delete1 = mysql_query("DELETE FROM weapon_crafting WHERE entry_id='$entry_id' AND id='$id'") or die(mysql_error());
-
-            //this adds one to the correct weapon type on the homebase_sheet
-            if ($type == "knife"){
-                $update1 = mysql_query("UPDATE homebase_sheet SET knife_for_pickup = knife_for_pickup+1 WHERE id='$id'") or die(mysql_error());
-                array_push($completed_array, "knife");
-            } elseif ($type == "club"){
-                $update1 = mysql_query("UPDATE homebase_sheet SET club_for_pickup = club_for_pickup+1 WHERE id='$id'") or die(mysql_error());
-                array_push($completed_array, "club");
-            }elseif ($type == "ammo"){
-                $update1 = mysql_query("UPDATE homebase_sheet SET ammo_for_pickup = ammo_for_pickup+1 WHERE id='$id'") or die(mysql_error());
-                array_push($completed_array, "ammo");
-            } elseif ($type == "gun"){
-                $update1 = mysql_query("UPDATE homebase_sheet SET gun_for_pickup = gun_for_pickup+1 WHERE id='$id'") or die(mysql_error());
-                array_push($completed_array, "gun");
-            }
+            $weapon_string += " and deleting from craftDB :: ";
         }
-        array_push($return_array, $completed_array);
+    
     } 
     //otherwise continue to doing the drop/pickup
 
@@ -54,93 +65,18 @@ if (isset($_POST['id'])) {
                 //create the insert queries to update both tables
                 $update = mysql_query("UPDATE homebase_sheet SET supply ='$new_supply' WHERE id='$id'") or die(mysql_error()); 
                 $update = mysql_query("UPDATE player_sheet SET supply = 0 WHERE id='$id'");
-
-                //need to check for completed weapons, expire them from the weapon_crafting sheet, and add them to the homebase
                 
-                //grab the weapons completed
-                $knives = $row1['knife_for_pickup'];
-                $clubs = $row1['club_for_pickup'];
-                $ammo = $row1['ammo_for_pickup'];
-                $guns = $row1['gun_for_pickup'];
-                $survivors = $row1['active_survivor_for_pickup'];
-                $pickup_array = array("knife_for_pickup" => $knives, "club_for_pickup" => $clubs, "ammo_for_pickup" => $ammo, "gun_for_pickup" => $guns, "active_survivor_for_pickup" => $survivors);
-                
-                //if there's ammo to transfer, add it to the player sheet
-                if ($ammo > 0 ){
-                    $update = mysql_query("UPDATE player_sheet SET ammo = ammo + $ammo WHERE id='$id'") or die(mysql_error());
-                }
-                //if any of the other weapons are greater than 0 create that weapon from static class and instantiate on active_weapons on the
-                if ($knives > 0 ) {
-                    $knife_lookup = mysql_query("SELECT * FROM static_weapon_classes WHERE type='knife'") or die(mysql_error());
-                    $knife_data = mysql_fetch_assoc($knife_lookup);
-                    $knife_name = $knife_data['name'];
-                    $knife_type = $knife_data['type'];
-                    $knife_base_dmg = $knife_data['base_dmg'];
-                    $knife_top_dmg = $knife_data['top_dmg'];
-                    $knife_bot_dmg = $knife_data['bot_dmg'];
-                    $knife_dur = $knife_data['durability'];
-
-                    for ($i=0; $i < $knives; $i++) {
-                        $insert = mysql_query("INSERT INTO active_weapons (owner_id, name, type, base_dmg, top_dmg, bot_dmg, durability, isEquipped) VALUES ('$id', '$knife_name', '$knife_type', '$knife_base_dmg', '$knife_top_dmg', '$knife_bot_dmg', '$knife_dur', 0 )") or die(mysql_error());
-                    }
-                }
-
-                if ($clubs > 0) {
-                    $club_lookup = mysql_query("SELECT * FROM static_weapon_classes WHERE type='club'") or die(mysql_error());
-                    $club_data = mysql_fetch_assoc($club_data);
-                    $club_name = $club_data['name'];
-                    $club_type = $club_data['type'];
-                    $club_base_dmg = $club_data['base_dmg'];
-                    $club_top_dmg = $club_data['top_dmg'];
-                    $club_bot_dmg = $club_data['bot_dmg'];
-                    $club_dur = $club_data['durability'];
-
-                    for ($i=0; $i < $clubs; $i++) {
-                        $insert = mysql_query("INSERT INTO active_weapons (owner_id, name, type, base_dmg, top_dmg, bot_dmg, durability, isEquipped) VALUES ('$id', '$club_name', '$club_type', '$club_base_dmg', '$club_top_dmg', '$club_bot_dmg', '$club_dur', 0 )") or die(mysql_error());
-                    }
-                }
-
-                if ( $guns > 0 ) {
-                    $gun_lookup = mysql_query("SELECT * FROM static_weapon_classes WHERE type='gun'") or die(mysql_error());
-                    $gun_data = mysql_fetch_assoc ($gun_lookup);
-                    $gun_name = $gun_data['name'];
-                    $gun_type = $gun_data['type'];
-                    $gun_base_dmg = $gun_data['base_dmg'];
-                    $gun_top_dmg = $gun_data['top_dmg'];
-                    $gun_bot_dmg = $gun_data['bot_dmg'];
-                    $gun_durability = $gun_data['durability'];
-
-                    for ($i=0; $i < $guns; $i++) {
-                        $insert = mysql_query("INSERT INTO active_weapons (owner_id, name, type, base_dmg, top_dmg, bot_dmg, durability, isEquipped) VALUES ('$id', '$gun_name', '$gun_type', '$gun_base_dmg', '$gun_top_dmg', '$gun_bot_dmg', '$gun_durability', 0 )") or die(mysql_error());
-                    }
-                }
-
-
-                //after the weapons have been created on the active weapons table- remove them from the homebase
-                $update = mysql_query("UPDATE homebase_sheet SET knife_for_pickup=0, club_for_pickup=0, ammo_for_pickup=0, gun_for_pickup=0, active_survivor_for_pickup=0 WHERE id='$id'") or die(mysql_error());
-
                 array_push($return_array, "Success");
-                array_push($return_array, "Player has completed a resupply");
-                if ($knives > 0 || $clubs > 0 || $ammo > 0 || $guns > 0 || $survivors > 0) {
-                    array_push($return_array, $pickup_array);
-                }else{
-                    array_push($return_array, "none");
-                }
-                $json_return = json_encode($return_array, JSON_NUMERIC_CHECK);
-                echo $json_return;
+                array_push($return_array, $weapon_string);
             } else {
                 //if the player has no supply to transfer
                 array_push($return_array, "Failed");
                 array_push($return_array, "You cannot transfer negative supply");
-                $json_return = json_encode($return_array);
-                echo $json_return;
             } 
 
         } else if (mysql_num_rows($query1) > 1 ) {
             array_push($return_array, "Failed");
             array_push($return_array, "More than one entry found for the players homebase");
-            $json_return = json_encode($return_array);
-            echo $json_return;
         }
 
 
@@ -148,13 +84,13 @@ if (isset($_POST['id'])) {
         //the player has not yet set their homebase- return failure
         array_push($return_array, "Failed");
         array_push($return_array, "No matching entries for the players homebase");
-        $json_return = json_encode($return_array);
-        echo $json_return;
+        
     }
-
-
 } else {
     echo "No user ID sent in form";
 }
+
+$json_return = json_encode($return_array);
+echo $json_return;
 
 ?>
