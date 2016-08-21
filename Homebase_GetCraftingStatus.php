@@ -5,9 +5,9 @@ $return_array = array();
 if (isset($_POST['id'])){
     $id = protect($_POST['id']);
     //get the weapons still being worked on
-    $query1 = mysql_query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete > NOW()") or die(mysql_error());
+    $query1 = mysql_query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete > NOW() ORDER BY time_complete ASC") or die(mysql_error());
     //get the weapons to expire
-    $query2 = mysql_query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete < NOW()") or die(mysql_error());
+    $query2 = mysql_query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete < NOW() ORDER BY time_complete DESC") or die(mysql_error());
     
     
     $weapon_inprogress_array = array();

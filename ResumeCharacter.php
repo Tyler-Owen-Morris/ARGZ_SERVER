@@ -12,7 +12,7 @@
         if (mysql_num_rows($userdata) == 1) {
             
             while ($row = mysql_fetch_assoc($userdata)) {
-                $userdataarr = array("id" => $row['id'], "first_name" => $row['first_name'], "last_name" => $row['last_name'], "char_created_DateTime" => $row['char_created_DateTime'], "homebase_lat" => $row['homebase_lat'], "homebase_lon" => $row['homebase_lon'], "supply" => $row['supply'], "water" => $row['water'], "food" => $row['food'], "ammo" => $row['ammo'], "equipped_weapon_id" => $row['equipped_weapon_id'], "curr_stamina" => $row['curr_stamina'], "max_stamina" => $row['max_stamina']);
+                $userdataarr = array("id" => $row['id'], "first_name" => $row['first_name'], "last_name" => $row['last_name'], "char_created_DateTime" => $row['char_created_DateTime'], "homebase_lat" => $row['homebase_lat'], "homebase_lon" => $row['homebase_lon'], "homebase_set_time" => $row['homebase_set_time'], supply => $row['supply'], "water" => $row['water'], "food" => $row['food'], "ammo" => $row['ammo'], "equipped_weapon_id" => $row['equipped_weapon_id'], "curr_stamina" => $row['curr_stamina'], "max_stamina" => $row['max_stamina']);
                 array_push($return_array, "Success");
                 array_push($return_array, $userdataarr);
                 $jsondata = json_encode($return_array, JSON_NUMERIC_CHECK);

@@ -13,6 +13,7 @@ if(isset($_POST['owner_id'])){
     $curr_stam = protect($_POST['curr_stam']);
     $base_attk = protect($_POST['base_attack']);
     $team_pos = protect($_POST['team_position']);
+    $pic_url = protect($_POST['picture_url']);
 
 
     if(!is_numeric($base_stam)) {
@@ -32,8 +33,9 @@ if(isset($_POST['owner_id'])){
         echo $json_return;
     } else {
         //create new entry on the DB
-        $insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position) VALUES ('$id', '$name', '$base_stam', '$curr_stam', '$base_attk', '$wep_equipped', 1, NOW(), '$team_pos')") or die(mysql_error());
+        $insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, profile_pic_url) VALUES ('$id', '$name', '$base_stam', '$curr_stam', '$base_attk', '$wep_equipped', 1, NOW(), '$team_pos', '$pic_url')") or die(mysql_error());
         array_push($returnArray, "Success");
+        array_push($returnArray, "Character successfully added to server");
         $json_return = json_encode($returnArray);
         echo $json_return;
     }
@@ -43,3 +45,4 @@ if(isset($_POST['owner_id'])){
     $json_return = json_encode($returnArray);
     echo $json_return;
 }
+?>

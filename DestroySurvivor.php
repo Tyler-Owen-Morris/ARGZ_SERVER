@@ -15,7 +15,7 @@ if ($id <> ''){
         $update_replacement = mysql_query("UPDATE survivor_roster SET team_position='$team_pos' WHERE owner_id='$id' AND team_position=0 LIMIT 1");
 
         //remove the dead survivor
-        $delete = mysql_query("DELETE * FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die(mysql_error());
+        $delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die(mysql_error());
 
         if (mysql_affected_rows() > 0) {
             array_push($returnArray, "Success");
