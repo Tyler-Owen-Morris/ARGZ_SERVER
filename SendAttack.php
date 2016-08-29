@@ -24,7 +24,7 @@ if ($id <> '') {
                 $durability = $row['durability'];
                 if ($durability-1 <= 0) {
                     //if the weapon is out of durability on this swing, remove it from the DB, it's destoyed
-                    $delete = mysql_query("DELETE * FROM active_weapons WHERE owner_id='$id' AND weapon_id='$weapon_id' LIMIT 1") or die(msql_error());
+                    $delete = mysql_query("DELETE FROM active_weapons WHERE owner_id='$id' AND weapon_id='$weapon_id' LIMIT 1") or die(mysql_error());
                 } else {
                     $durability_update = mysql_query("UPDATE active_weapons SET durability=durability-1 WHERE weapon_id='$weapon_id' AND owner_id='$id'") or die(mysql_error());
                 }

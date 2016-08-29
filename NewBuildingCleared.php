@@ -69,12 +69,14 @@ if(isset($_POST['id'])){
             }
 
             $insert_survivor = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position) VALUES ('$id', '$survivor_name', '$survivor_stam', '$survivor_stam', '$survivor_attack', '0', 1, NOW(), '$team_pos')") or die(mysql_error());
+            $inst_surv_row = mysql_fetch_assoc($insert_survivor);
+            $new_survivor_array = array("entry_id"=>$inst_surv_row['entry_id'], "owner_id"=>$inst_surv_row['owner_id'], "name"=>$inst_surv_row['name'], "base_stam"=>$inst_surv_row['base_stam'], "curr_stam"=>$inst_surv_row['curr_stam'], "base_attack"=>$inst_surv_row['base_attack']);
             array_push($return_array, 1);
-            array_push($return_array, $survivor_name);
+            array_push($return_array, $new_survivor_array);
         } else {
             array_push($return_array, 0);
         }
-        $json_return = json_encode($return_array);
+        $json_return = json_encode($return_array, JSON_NUMERIC_CHECK);
         echo $json_return;
     } else {
         echo "building name not passed";

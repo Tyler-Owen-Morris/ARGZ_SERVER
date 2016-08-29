@@ -4,10 +4,12 @@
     if (isset($_POST['id'])) {
         $id = protect($_POST['id']);
         
-        $bldgquery = "SELECT * FROM cleared_buildings WHERE id = '$id'";
+        $now = 'NOW()';
+        $active_cleartime = $now;
+        date_sub($active_cleartime, date_interval_create_from_date_string("20 hours"));
+        $bldgquery = "SELECT * FROM cleared_buildings WHERE id = '$id' AND time_cleared>$active_cleartime";
         $bldgData = mysql_query($bldgquery);
         
-        //echo "The raw sql query returned: " + $userdata;
         
         if (mysql_num_rows($bldgData) > 0 ) {
             $bldgDataArray = array();
