@@ -15,10 +15,15 @@ if ($id <> '') {
                 $weapon_query = mysql_query("SELECT * FROM active_weapons WHERE owner_id='$id' AND weapon_id='$weapon_id'") or die(mysql_error());
                 $row = mysql_fetch_assoc($weapon_query);
                 $stam_cost = $row['stam_cost'];
+                //this query allows for negative stamina numbers
+                $stamina_update1 = mysql_query("UPDATE survivor_roster SET curr_stam=curr_stam-$stam_cost WHERE entry_id='$survivor_id' AND owner_id='$id'") or die(mysql_error());
+
+                /* //This was the old way of making sure stamina didn't go negative. We are now working with possible negative stamina ^^^^^^^
                 $stamina_update = mysql_query("UPDATE survivor_roster SET curr_stam=curr_stam-$stam_cost WHERE owner_id='$id' AND entry_id='$survivor_id' AND curr_stam>$stam_cost") or die(mysql_error());
                 if(mysql_affected_rows() == 0){
                     $stamina_update = mysql_query("UPDATE survivor_roster SET curr_stam=0 WHERE entry_id='$survivor_id' and owner_id='$id'") or die(mysql_error());
                 }
+                */
 
                 //subtract durability from the weapon
                 $durability = $row['durability'];
@@ -40,12 +45,22 @@ if ($id <> '') {
                 array_push($returnArray, "Player & weapon have been adjusted on the server");
             } else {
                 //unarmed swing, no weapon to reduce durability on.
+
+                $survivor_update2 = mysql_query("UPDATE survivor_roster SET curr_stam=curr_stam-5 WHERE owner_id='$id' AND entry_id='$survivor_id'") or die(mysql_error());
+
+                /*  //this query does not allow stamina to become negative. New math requires negative stamina numbers
                 $survivor_update = mysql_query("UPDATE survivor_roster SET curr_stam=curr_stam-5 WHERE owner_id='$id' AND entry_id='$survivor_id' AND curr_stam>5") or die(mysql_error());
                 if(mysql_affected_rows()==0) {
                     $survivor_update2 = mysql_query ("UPDATE survivor_roster SET curr_stam=0 WHERE owner_id='$id' and entry_id='$survivor_id'") or die(mysql_error());
                 }
-                array_push($returnArray, "Success");
-                array_push($returnArray, "Player has executed an unarmed attack.");
+                */
+                if (mysql_affected_rows() > 0){
+                    array_push($returnArray, "Success");
+                    array_push($returnArray, "Player has executed an unarmed attack.");
+                } else {
+                    array_push($returnArray, "Failed");
+                    array_push($returnArray, "unable to execute attack");
+                }
             }
 
         }else{
