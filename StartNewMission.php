@@ -62,11 +62,11 @@ if ($id <> '') {
                         date_add($now, $interval_string), '$duration', '$ammo_used')") or die(mysql_error());
 
                     //update the survivor records to set the "on_mission" boolean to true
-                    $surv1_update = mysql_query("UPDATE survivor_roster SET onMission=1 WHERE owner_id='$id' AND entry_id='$survivor1_id'") or die(mysql_error());
-                    $surv2_update = mysql_query("UPDATE survivor_roster SET onMission=1 WHERE owner_id='$id' AND entry_id='$survivor2_id'") or die(mysql_error());
-                    $surv3_update = mysql_query("UPDATE survivor_roster SET onMission=1 WHERE owner_id='$id' AND entry_id='$survivor3_id'") or die(mysql_error());
-                    $surv4_update = mysql_query("UPDATE survivor_roster SET onMission=1 WHERE owner_id='$id' AND entry_id='$survivor4_id'") or die(mysql_error());
-                    $surv5_update = mysql_query("UPDATE survivor_roster SET onMission=1 WHERE owner_id='$id' AND entry_id='$survivor5_id'") or die(mysql_error());
+                    $surv1_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor1_dead' WHERE owner_id='$id' AND entry_id='$survivor1_id'") or die(mysql_error());
+                    $surv2_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor2_dead' WHERE owner_id='$id' AND entry_id='$survivor2_id'") or die(mysql_error());
+                    $surv3_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor3_dead' WHERE owner_id='$id' AND entry_id='$survivor3_id'") or die(mysql_error());
+                    $surv4_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor4_dead' WHERE owner_id='$id' AND entry_id='$survivor4_id'") or die(mysql_error());
+                    $surv5_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor5_dead' WHERE owner_id='$id' AND entry_id='$survivor5_id'") or die(mysql_error());
 
                     //attempt to update the building entry
                     $now = 'now()';

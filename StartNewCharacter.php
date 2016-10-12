@@ -31,7 +31,7 @@ if(isset($_POST['id'])){
     //if the player has an old account. then we update player sheet and blank all other sheets.
     if(mysql_num_rows($register1) > 0) {
         //if the id is already registered, it should just overwrite the new character data into that acccount.
-        $update1 = mysql_query("UPDATE player_sheet SET first_name = '$first_name', last_name = '$last_name', homebase_set_time = '$homebase_set_time', homebase_lat = 0.0, homebase_lon = 0.0, supply = '$supply', food = '$food', water = '$water', char_created_DateTime = NOW(), ammo = '$ammo', equipped_weapon_id = '0', curr_stamina = '$stamina', max_stamina= '$stamina' WHERE id = '$id'")or die(mysql_error());
+        $update1 = mysql_query("UPDATE player_sheet SET first_name = '$first_name', last_name = '$last_name', homebase_set_time = '$homebase_set_time', homebase_lat = 0.0, homebase_lon = 0.0, supply = '$supply', food = '$food', water = '$water', char_created_DateTime = NOW(), ammo = '$ammo', equipped_weapon_id = '0', curr_stamina = '$stamina', max_stamina= '$stamina', meals=0, isZombie=0 WHERE id = '$id'")or die(mysql_error());
     
         //DELETE ALL OTHER ACTIVE PLAYER DATA IN ALL OTHER TABLES.
 
@@ -67,7 +67,7 @@ if(isset($_POST['id'])){
     
     } else {
         //otherwise- create an entire new user based on the post data.
-        $insert1 = mysql_query("INSERT INTO player_sheet (id, first_name, last_name, char_created_DateTime, homebase_lat, homebase_lon, supply, food, water, ammo, equipped_weapon_id, curr_stamina, max_stamina) VALUES ('$id', '$first_name', '$last_name', NOW(), '$home_lat', '$home_lon', '$supply', '$food', '$water', '$ammo', '0', '$stamina', '$stamina')")or die(mysql_error());
+        $insert1 = mysql_query("INSERT INTO player_sheet (id, first_name, last_name, char_created_DateTime, homebase_lat, homebase_lon, supply, food, water, ammo, equipped_weapon_id, curr_stamina, max_stamina, meals, isZombie) VALUES ('$id', '$first_name', '$last_name', NOW(), '$home_lat', '$home_lon', '$supply', '$food', '$water', '$ammo', '0', '$stamina', '$stamina', 0, 0)")or die(mysql_error());
             echo "character successfully added to the database";
 
         //DELETE ALL OTHER ACTIVE PLAYER DATA IN ALL OTHER TABLES.

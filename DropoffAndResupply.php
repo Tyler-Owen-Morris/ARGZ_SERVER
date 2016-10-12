@@ -38,7 +38,7 @@ if (isset($_POST['id'])) {
                 $weapon_string += " creating weapon record";
             } else {
                 //increment the players ammo up by 1
-                $ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+1 WHERE id = '$id'") or die(mysql_error());
+                $ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+5 WHERE id = '$id'") or die(mysql_error());
                 $weapon_string += " adding ammo";
             }
            // $insert = mysql_query("INSERT into active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability) SELECT '$id' as owner_id, '0' as equipped_id, name, type, stam_cost, base_dmg, modifier, durability from static_weapons_classes where type='$type'") or die(mysql_error());

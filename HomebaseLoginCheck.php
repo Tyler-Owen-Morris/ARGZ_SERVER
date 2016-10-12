@@ -12,17 +12,15 @@ if (isset($_POST['id'])) {
         if(mysql_num_rows($query1) == 1) {
             $player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
             $player_row = mysql_fetch_assoc($player_query);
-            $player_array = array("first_name"=>$player_row['first_name'], "last_name"=>$player_query['last_name'], "homebase_lat"=>$player_row['homebase_lat'], "homebase_lon"=>$player_row['homebase_lon']);
-
+            
             //there is only 1 entry in the db for our players homebase, cleared to proceed.
             $row2 = mysql_fetch_assoc($query1);
-            $homebase_array = array("id"=>$row2['id'], "supply"=>$row2['supply'], "knife_for_pickup"=>$row2['knife_for_pickup'], "club_for_pickup"=>$row2['club_for_pickup'], "ammo_for_pickup"=>$row2['ammo_for_pickup'], "gun_for_pickup"=>$row2['gun_for_pickup'], "active_survivor_for_pickup"=>$row2['active_survivor_for_pickup'], "inactive_survivors"=>$row2['inactive_survivors']);
 
             //construct and return the json package
             array_push($return_array, "Success");
             array_push($return_array, "Resuming");
-            array_push($return_array, $homebase_array);
-            array_push($return_array, $player_array);
+            array_push($return_array, $row2);
+            array_push($return_array, $player_row);
             $json_return = json_encode($return_array, JSON_NUMERIC_CHECK);
             echo $json_return;
         }else if (mysql_num_rows($query1) >= 2){
@@ -34,7 +32,7 @@ if (isset($_POST['id'])) {
         }
     } else {
         //if there is not a homebase entry, we need to check if there is a player created for mobile.
-        $query2 = mysql_query("SELECT * FROM user_sheet WHERE id='$id'") or die(mysql_error());
+        $query2 = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
 
         if(mysql_num_rows($query2) > 0) {
             //if there is a player, but no homebase entry- we want to create a new homebase entry now.

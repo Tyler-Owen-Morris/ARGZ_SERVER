@@ -6,7 +6,7 @@ $returnArray = array();
 if(isset($_POST['request_id'])){
     if(isset($_POST['accept_id'])){
 		//echo "post data is there, proceeding </br>";
-        $accept_id = protect($_POST['accept_id']);
+        $accept_id = protect($_POST['id']);
         $request_id = protect($_POST['request_id']);
 
         //This is a lookup to find matching currently paired players

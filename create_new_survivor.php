@@ -6,8 +6,7 @@
 
 $returnArray = array();
 
-if(isset($_POST['owner_id'])){
-    $id = protect($_POST['owner_id']);
+    $id = protect($_POST['id']);
     $name = protect($_POST['name']);
     $base_stam = protect($_POST['base_stam']);
     $curr_stam = protect($_POST['curr_stam']);
@@ -39,10 +38,5 @@ if(isset($_POST['owner_id'])){
         $json_return = json_encode($returnArray);
         echo $json_return;
     }
-} else {
-    array_push($returnArray, "failed");
-    array_push($returnArray, "id not set");
-    $json_return = json_encode($returnArray);
-    echo $json_return;
-}
+
 ?>
