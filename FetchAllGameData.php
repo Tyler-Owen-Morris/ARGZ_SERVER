@@ -48,6 +48,22 @@
         $meal_update = mysql_query($temp_string) or die(mysql_error());
     }
 
+    //evaluate injury data
+    $injury_query = mysql_query("SELECT * FROM injury_table WHERE owner_id='$id' AND expire_time<Now()") or die(mysql_error());
+    if (mysql_num_rows($injury_query) > 0) {
+        while($expired_injury = mysql_fetch_assoc($injury_query)){
+            $surv_id = $expired_injury['survivor_id'];
+            $stam_loss = $expired_injury['stam_loss'];
+            $attk_loss = $expired_injury['attk_loss'];
+            //update the survivor roster w/ permenant effects
+            $survivor_activate = mysql_query("UPDATE survivor_roster SET injured=0, isActive=1, base_attack=base_attack-$attk_loss, base_stam=base_stam-$stam_loss WHERE owner_id='$id' AND entry_id='$surv_id'") or die(mysql_error());
+        }
+        //remove expired entries
+        $injury_delete = mysql_query("DELETE FROM injury_table WHERE owner_id='$id' AND expire_time<now()") or die(mysql_error());
+    }
+    $injury_query1 = mysql_query("SELECT * FROM injury_table WHERE owner_id='$id' AND expire_time>now()") or die(mysql_error());
+    $active_injury_array = mysql_fetch_assoc($injury_query1);
+
     //player data
     $player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
     $player_data_array = mysql_fetch_assoc($player_query);
@@ -123,6 +139,7 @@
     array_push($return_array, $active_outpost_array);
     array_push($return_array, $mission_data_array);
     array_push($return_array, $death_data_array);
+    array_push($return_array, $active_injury_array);
 
     echo json_encode($return_array, JSON_NUMERIC_CHECK);
 ?>

@@ -18,19 +18,19 @@ if ($id <> ''){
         $delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die(mysql_error());
 
         if (mysql_affected_rows() > 0) {
-            array_push($returnArray, "Success");
-            array_push($returnArray, "Survivor record was removed");
+            array_push($return_array, "Success");
+            array_push($return_array, "Survivor record was removed");
         } else {
             array_push($return_array, "Failed");
             array_push($return_array, "Failed to locate survivor record");
         }
     } else {
-        array_push($returnArray, "Failed");
-        array_push($returnArray, "Survivor ID not set");
+        array_push($return_array, "Failed");
+        array_push($return_array, "Survivor ID not set");
     }
 } else {
-    array_push($returnArray, "Failed");
-    array_push($returnArray, "Player ID not set");
+    array_push($return_array, "Failed");
+    array_push($return_array, "Player ID not set");
 }
 $jsonreturn = json_encode($return_array);
 echo $jsonreturn;

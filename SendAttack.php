@@ -6,6 +6,7 @@ $returnArray = array();
 $id = isset($_POST['id']) ? protect($_POST['id']) : '';
 $survivor_id = isset($_POST['survivor_id']) ? protect($_POST['survivor_id']) : '';
 $weapon_id = isset($_POST['weapon_id']) ? protect($_POST['weapon_id']) : '';
+$zombie_killed = isset($_POST['zombie_kill']) ? protect($_POST['zombie_kill']) : '';
 
 if ($id <> '') {
     if ($survivor_id <> '') {
@@ -61,6 +62,10 @@ if ($id <> '') {
                     array_push($returnArray, "Failed");
                     array_push($returnArray, "unable to execute attack");
                 }
+            }
+
+            if ($zombie_killed == 1) {
+                $kill_update = mysql_query("UPDATE player_sheet SET zombies_killed=zombies_killed+1 WHERE id='$id'") or die(mysql_error());
             }
 
         }else{
