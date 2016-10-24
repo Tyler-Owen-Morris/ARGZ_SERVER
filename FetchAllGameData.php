@@ -4,7 +4,7 @@
     $return_array = array();
 
     //evaluate eating/drinking
-    $meals_query = mysql_query("SELECT FLOOR(HOUR(TIMEDIFF(NOW(), char_created_DateTime))/6) as total_meals, meals, food, water FROM player_sheet WHERE id='$id'");
+    $meals_query = mysql_query("SELECT FLOOR(HOUR(TIMEDIFF(NOW(), char_created_DateTime))/6) as total_meals, meals, food, water, char_created_DateTime FROM player_sheet WHERE id='$id'");
     $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$id' AND dead=0");
     $meals_data = mysql_fetch_assoc($meals_query);
     $survivor_data = mysql_fetch_assoc($survivor_query);
@@ -15,6 +15,8 @@
     $survivor_count = mysql_num_rows($survivor_query);
     $meals_to_process = $total_meals - $curr_meals;
     $ima_zombie = 0;
+    $created_time = $meals_data["char_created_DateTime"];
+    $game_over_score_hrs = 0;
 
     $death_data_array = array();
 
@@ -35,6 +37,7 @@
                     $ima_zombie = 1;
                     $total_meals = $total_meals - $meals_to_process;
                     $meals_to_process = 0;
+                    $game_over_score_hrs = $total_meals * 6;
                 }
             }
         }
@@ -44,8 +47,14 @@
         if($water_count < $survivor_count * -8) $water_count = $survivor_count * -8;
 
         //update the new food and water values to the player sheet.
-        $temp_string = "UPDATE player_sheet SET food='$food_count', water='$water_count', meals='$total_meals', isZombie='$ima_zombie' WHERE id='$id'";
-        $meal_update = mysql_query($temp_string) or die(mysql_error());
+        if ($game_over_score_hrs == 0) {
+            $temp_string = "UPDATE player_sheet SET food='$food_count', water='$water_count', meals='$total_meals' WHERE id='$id'";
+            $meal_update = mysql_query($temp_string) or die($temp_string . mysql_error());
+        } else {
+            $interval_string = "interval ".$game_over_score_hrs." hour";
+            $temp_string = "UPDATE player_sheet SET food='$food_count', water='$water_count', meals='$total_meals', isZombie='$ima_zombie', game_over_datetime=date_add(char_created_DateTime, $interval_string) WHERE id='$id' AND isZombie=0";
+            $game_over_update = mysql_query($temp_string) or die($temp_string . mysql_error());
+        }
     }
 
     //evaluate injury data
@@ -61,8 +70,13 @@
         //remove expired entries
         $injury_delete = mysql_query("DELETE FROM injury_table WHERE owner_id='$id' AND expire_time<now()") or die(mysql_error());
     }
+    $active_injury_array = array();
     $injury_query1 = mysql_query("SELECT * FROM injury_table WHERE owner_id='$id' AND expire_time>now()") or die(mysql_error());
-    $active_injury_array = mysql_fetch_assoc($injury_query1);
+    if (mysql_num_rows($injury_query1) > 0) {
+        array_push($active_injury_array, $injury_query1);
+    } else {
+        $active_injury_array = null;
+    }
 
     //player data
     $player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
@@ -89,13 +103,12 @@
     }
     
     //cleared building data
-    $active_cleartime = 'now()';
-    date_sub($active_cleartime, date_interval_create_from_date_string("20 hours"));
-    $bldg_data = mysql_query("SELECT * FROM cleared_buildings WHERE id = '$id' AND time_cleared>$active_cleartime");
+    $bldg_activate = mysql_query("UPDATE cleared_buildings SET active=1 WHERE time_cleared<date_sub(now(), interval 12 hour) AND id='$id'");
+    $bldg_data = mysql_query("SELECT * FROM cleared_buildings WHERE id = '$id'");
     $bldg_data_array = array();
     if (mysql_num_rows($bldg_data) > 0) {
         while ($bldg = mysql_fetch_assoc($bldg_data)) 
-            array_push($bldg_data_array, $bldg); 
+            array_push($bldg_data_array, $bldg);
     } else {
         $bldg_data_array = null;
     }

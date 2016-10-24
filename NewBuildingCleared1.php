@@ -16,7 +16,7 @@ if ($id <> '') {
         //find the matching building entry
         $existing_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_id='$bldg_id'") or die(mysql_error());
 
-        if (mysql_num_rows($existing_query) > 0) {
+        if (mysql_num_rows() > 0) {
             //update the old query
             $bldg_update = mysql_query("UPDATE cleared_buildings SET active=0 AND time_cleared=NOW() WHERE id='$id' AND bldg_id='$bldg_id'") or die(mysql_error());
             array_push($return_array, "Success");
