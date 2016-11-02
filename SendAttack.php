@@ -7,9 +7,10 @@ $id = isset($_POST['id']) ? protect($_POST['id']) : '';
 $survivor_id = isset($_POST['survivor_id']) ? protect($_POST['survivor_id']) : '';
 $weapon_id = isset($_POST['weapon_id']) ? protect($_POST['weapon_id']) : '';
 $zombie_killed = isset($_POST['zombie_kill']) ? protect($_POST['zombie_kill']) : '';
+$building_name = isset($_POST['bldg_name']) ? protect($_POST['bldg_name']) : '';
 
 if ($id <> '') {
-    if ($survivor_id <> '') {
+    if ($survivor_id <> '' || $building_id <> '') {
         if ($weapon_id <> '') {
             if($weapon_id != 0) {
                 //subtract stamina cost from survivor's current stamina
@@ -66,6 +67,17 @@ if ($id <> '') {
 
             if ($zombie_killed == 1) {
                 $kill_update = mysql_query("UPDATE player_sheet SET zombies_killed=zombies_killed+1 WHERE id='$id'") or die(mysql_error());
+                if (mysql_affected_rows()) {
+                    array_push($returnArray, "player sheet updated successfully");
+                } else {
+                    array_push($returnArray, "did not update the player sheet successfully");
+                }
+                $bldg_update = mysql_query("UPDATE cleared_buildings SET zombies=zombies-1 WHERE id='$id' AND bldg_name='$building_name'") or die(mysql_error());
+                if (mysql_affected_rows()) {
+                    array_push($returnArray, "cleared building updated successfully");
+                } else {
+                    array_push($returnArray, "did not update the buildings successfully");
+                }
             }
 
         }else{

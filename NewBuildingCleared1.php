@@ -3,7 +3,6 @@ include("db_connect.php");
 
 $return_array = array();
 
-$id = isset($_POST['id']) ? protect($_POST['id']) : '';
 $bldg_name = isset($_POST['bldg_name']) ? protect($_POST['bldg_name']) : '';
 $bldg_id = isset($_POST['bldg_id']) ? protect($_POST['bldg_id']) : '';
 $supply_earned = isset($_POST['supply']) ? protect($_POST['supply']) : '';
@@ -14,18 +13,22 @@ $survivor_found = isset($_POST['survivor_found']) ? protect($_POST['survivor_fou
 if ($id <> '') {
     if ($bldg_id <> '') {
         //find the matching building entry
-        $existing_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_id='$bldg_id'") or die(mysql_error());
+        $existing_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
 
-        if (mysql_num_rows() > 0) {
+        if (mysql_num_rows($existing_query) > 0) {
             //update the old query
-            $bldg_update = mysql_query("UPDATE cleared_buildings SET active=0 AND time_cleared=NOW() WHERE id='$id' AND bldg_id='$bldg_id'") or die(mysql_error());
+            $bldg_data = mysql_fetch_assoc($existing_query);
+            $bldg_supply = $bldg_data['supply'] - $supply_earned;
+            $bldg_food = $bldg_data['food'] - $food_earned;
+            $bldg_water = $bldg_data['water'] - $water_earned;
+
+            $bldg_update = mysql_query("UPDATE cleared_buildings SET active=0, time_cleared=NOW(), supply=$bldg_supply, food=$bldg_food, water=$bldg_water, zombies=-1 WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
             array_push($return_array, "Success");
             array_push($return_array, "Building entry updated on the server");
         } else {
-            //insert into cleared builings
-            $bldg_insert = mysql_query("INSERT INTO cleared_buildings (id, bldg_name, bldg_id, active, time_cleared) VALUES ('$id', '$bldg_name', '$bldg_id', 0, NOW())") or die(mysql_error());
-            array_push($return_array, "Success");
-            array_push($return_array, "Building successfully added to database");
+            array_push($return_array, "Failed");
+            array_push($return_array, "No pre-existing entry found... so you didnt enter a building that you're now exiting?");
+            die(json_encode($return_array, JSON_NUMERIC_CHECK));
         }
 
         //update the player sheet with the added stats
@@ -36,7 +39,15 @@ if ($id <> '') {
         $new_water = $player_data['water'] + $water_earned;
 
         $update2 = mysql_query("UPDATE player_sheet SET supply=$new_supply, food=$new_food, water=$new_water WHERE id = '$id'") or die(mysql_error());
-       
+        
+        if (mysql_affected_rows()) {
+            
+        } else  {
+            array_push($return_array, "Failed");
+            array_push($return_array, "Unable to update player sheet with new resources");
+            die(json_encode($return_array, JSON_NUMERIC_CHECK));
+        }
+
         //if there's a survivor found- then create them on the table
         if ($survivor_found == 1) {
             //pull data from a radom static survivor

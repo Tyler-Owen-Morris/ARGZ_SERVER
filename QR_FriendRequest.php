@@ -3,158 +3,163 @@ include("db_connect.php");
 
 $returnArray = array();
 
-if(isset($_POST['request_id'])){
-    if(isset($_POST['accept_id'])){
-		//echo "post data is there, proceeding </br>";
-        $accept_id = protect($_POST['id']);
-        $request_id = protect($_POST['request_id']);
+$accept_id = isset($_POST['id']) ? protect($_POST['id']) : '';
+$request_id = isset($_POST['request_id']) ? protect($_POST['request_id']) : '';
 
-        //This is a lookup to find matching currently paired players
-        $query1 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$request_id' AND id_2='$accept_id'")or die(mysql_error());
-        $query2 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$accept_id' AND id_2='$request_id'")or die(mysql_error());
-        
-        //this finds the player data from the user_sheet for use in the json return.
-        $usrqry1 = "SELECT * FROM user_sheet WHERE id = '$accept_id'";
-        $accepting_user_data = mysql_query($usrqry1) or die(mysql_error());
-        $usrqry2 = "SELECT * FROM user_sheet WHERE id = '$request_id'";
-        $requesting_user_data = mysql_query($usrqry2) or die(mysql_error());
+if ($request_id <> '') {
+    //find each player's survivor
+    $accepting_survivor_game_data = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND team_position=5 LIMIT 1") or die(mysql_error());
+    $requesting_survivor_game_data = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND team_position=5 LIMIT 1") or die(mysql_error());
 
-        //find the survivor card for each player that represets the player
-        $accepting_survivor_game_data = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND team_position='1' LIMIT 1") or die(mysql_error());
-        $requsting_survivor_game_data = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND team_position='1' LIMIT 1") or die(mysql_error());
+    //find 'my-survivor-in-your-game' for eachother
+    $MS_YG_accepting_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error());
+    $MS_YG_requesting_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
 
-        if(mysql_num_rows($query1) > 0 || mysql_num_rows($query2) > 0) {
-			//echo "found a matching entry, processing </br>";
-            //if the two have paired up before, then update the date on the entry.
-            if(mysql_num_rows($query1) > 0) {
-                //if there's already an entry for this player that has become "active" by the chron script, deactivate it.
-                $update1 = mysql_query("UPDATE qr_pairs SET time=NOW() WHERE id_1='$request_id' AND id_2='$accept_id'") or die(mysql_error());
-                
-                array_push($returnArray, "Success");
-                while($row = mysql_fetch_assoc($requesting_user_data)){
-                    $userarray = array ("first_name" => $row['first_name'], "last_name" => $row['last_name']);
-                    array_push($returnArray, $userarray);
-                    $json_return = json_encode($returnArray);
-                    echo $json_return;
-                }
-            }
-			//if the request and accept id's are the same both of the queries will return values. This prevents the update from running twice on the same entry. this works for now, but future players will need to be given a failed message as players can't befriend themselves.
-			if ($accept_id != $request_id) {
-				if(mysql_num_rows($query2) > 0) {
-					//if there's already an entry for this player that has become "active" by the chron script, deactivate it.
-					$now = DateTime.now;
-					$update1 = mysql_query("UPDATE qr_pairs SET time=NOW() WHERE id_1='$accept_id' AND id_2='$request_id'") or die(mysql_error());
-					
-					array_push($returnArray, "Success");
-                    while($row = mysql_fetch_assoc($requesting_user_data)){
-                        $userarray = array ("first_name" => $row['first_name'], "last_name" => $row['last_name']);
-                        array_push($returnArray, $userarray);
-					    $json_return = json_encode($returnArray);
-					    echo $json_return;
-                    }
-				}
-			}
+    //find the player data
+    $accepting_player_data = mysql_query("SELECT * FROM player_sheet WHERE id='$accept_id'") or die(mysql_error());
+    $requesting_player_data = mysql_query("SELECT * FROM player_sheet WHERE id='$request_id'") or die(mysql_error());
 
-            //locate the existing matching pair
-            $accept_survivor_on_requster = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_query());
-            $request_survivor_on_accepter = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_query());
+    //This is a lookup to find matching currently paired players
+    $QR_query1 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$request_id' AND id_2='$accept_id'")or die(mysql_error());
+    $QR_query2 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$accept_id' AND id_2='$request_id'")or die(mysql_error());
 
-            //if entries are found, then update them, otherwise create new entries. since it is possible that the survivor has died, and thus been deleted.
-            if (mysql_num_rows($accept_survivor_on_requster) > 0) {
-                //verifying that there is ONLY 1 entry
-                if (mysql_num_rows($accept_survivor_on_requster) < 2){
-                    $row1 = mysql_fetch_assoc($accept_survivor_on_requster);
-                    $survivor_entry_id = $row1['entry_id'];
-                    $survivor_stamina = $row1['base_stam'];
-                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
-                }
-            } else {
-                //no match found- insert a new entry 
-                $row2 = mysql_fetch_assoc($accepting_survivor_game_data);
-                $name = $row2['name'];
-                $base_stam = $row2['base_stam'];
-                $base_attack = $row2['base_attack'];
-                $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$request_id', '$name', '$base_stam', '$base_stam', '$base_attack', 1, '0', '0', '$accept_id')") or die(mysql_error());
-            }
-            if (mysql_num_rows($request_survivor_on_accepter) > 0) {
-                //verifying that there is ONLY 1 entry
-                if (mysql_num_rows($request_survivor_on_accepter) < 2){
-                    $row1 = mysql_fetch_assoc($request_survivor_on_accepter);
-                    $survivor_entry_id = $row1['entry_id'];
-                    $survivor_stamina = $row1['base_stam'];
-                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
-                }
-            } else {
-                //no match found- insert a new entry
-                $row4 = mysql_fetch_assoc($requsting_survivor_game_data);
-                $name1 = $row4['name'];
-                $base_stam1 = $row4['base_stam'];
-                $base_attack1 = $row4['base_attack'];
-                $insert3 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$accept_id', '$name1', '$base_stam1', '$base_stam1', '$base_attack1', 1, '0', '0', '$request_id'") or die(mysql_query());
-            }
-            
+    if (mysql_num_rows($QR_query1) > 0 || mysql_num_rows($QR_query2) > 0) {
+        //these players have paired before
+        $pairing_data = array();
+        if (mysql_num_rows($QR_query1) > 0) {
+            $pairing_data = mysql_fetch_assoc($QR_query1);
+        } else if (mysql_num_rows($QR_query2)) {
+            $pairing_data = mysql_fetch_assoc($QR_query2);
         } else {
-            //otherwise- create an entire new pair.
-            //echo "No matches found, attempting new item insert </br>";
-            $now = DateTime.now;
-            $insert1 = mysql_query("INSERT INTO qr_pairs (id_1, id_2, time) VALUES ('$request_id', '$accept_id', NOW())")or die(mysql_error());
-            
-            array_push($returnArray, "Success");
-			while($row = mysql_fetch_assoc($requesting_user_data)){
-                $userarray = array ("first_name" => $row['first_name'], "last_name" => $row['last_name']);
-                array_push($returnArray, $userarray);
-                $json_return = json_encode($returnArray);
-                echo $json_return;
-            }
-
-             //locate the existing matching pair
-            $accept_survivor_on_requster = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_query());
-            $request_survivor_on_accepter = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_query());
-
-            //if entries are found, then update them, otherwise create new entries. since it is possible that the survivor has died, and thus been deleted.
-            if (mysql_num_rows($accept_survivor_on_requster) > 0) {
-                //verifying that there is ONLY 1 entry
-                if (mysql_num_rows($accept_survivor_on_requster) < 2){
-                    $row1 = mysql_fetch_assoc($accept_survivor_on_requster);
-                    $survivor_entry_id = $row1['entry_id'];
-                    $survivor_stamina = $row1['base_stam'];
-                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
-                }
-            } else {
-                //no match found- insert a new entry 
-                $row2 = mysql_fetch_assoc($accepting_survivor_game_data);
-                $name = $row2['name'];
-                $base_stam = $row2['base_stam'];
-                $base_attack = $row2['base_attack'];
-                $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$request_id', '$name', '$base_stam', '$base_stam', '$base_attack', 1, '0', '0', '$accept_id')") or die(mysql_error());
-            }
-            if (mysql_num_rows($request_survivor_on_accepter) > 0) {
-                //verifying that there is ONLY 1 entry
-                if (mysql_num_rows($request_survivor_on_accepter) < 2){
-                    $row1 = mysql_fetch_assoc($request_survivor_on_accepter);
-                    $survivor_entry_id = $row1['entry_id'];
-                    $survivor_stamina = $row1['base_stam'];
-                    $update2 = mysql_query("UPDATE survivor_roster SET base_stam='$survivor_stamina', curr_stam='$survivor_stamina', start_time=NOW() WHERE entry_id='$survivor_entry_id'") or die(mysql_error());
-                }
-            } else {
-                //no match found- insert a new entry
-                $row4 = mysql_fetch_assoc($requsting_survivor_game_data);
-                $name1 = $row4['name'];
-                $base_stam1 = $row4['base_stam'];
-                $base_attack1 = $row4['base_attack'];
-                $insert3 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, weapon_equipped, team_position, paired_user_id) VALUES ('$accept_id', '$name1', '$base_stam1', '$base_stam1', '$base_attack1', 1, '0', '0', '$request_id'") or die(mysql_query());
-            }
+            array_push($returnArray, "Failed");
+            array_push($returnArray, "unable to isolate existing pair entry");
+            die(json_encode($returnArray));
         }
+        $scan_id = $pairing_data['scan_id'];
+        $interval_string = "interval 12 hour";
+        $pairing_update = mysql_query("UPDATE qr_pairs SET pair_ts=now(), pairing_count=pairing_count+1 WHERE scan_id='$scan_id' AND pair_ts<date_sub(NOW(), $interval_string)") or die(mysql_error());
+
+        if (mysql_affected_rows() > 0) {
+            //successful pairing!
+            array_push($returnArray, "Success");
+
+            //construct arrays for each players survivor data.
+            $accepting_survivor_data = mysql_fetch_assoc($accepting_survivor_game_data);
+            $requesting_survivor_data = mysql_fetch_assoc($requesting_survivor_game_data);
+            
+            //if the accepting player already has a survivor on the requesting players roster
+            if (mysql_num_rows($MS_YG_accepting_query) > 0) {
+                $MS_YG_data = mysql_fetch_assoc($MS_YG_accepting_query);
+                $new_stam = $MS_YG_data['base_stam']+10;
+                $new_attk = $MS_YG_data['base_attack']+1;
+                $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error());
+            } else {
+                //insert the accepting survivor onto the requesting players survivor roster
+                $surv_name = $accepting_survivor_data['name'];
+                $surv_stam = $accepting_survivor_data['base_stam'];
+                $surv_attk = $accepting_survivor_data['base_attack'];
+                $pic_url = $accepting_survivor_data['profile_pic_url'];
+                $accepting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$request_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$accept_id', '$pic_url')") or die(mysql_error());
+            }
+            //if the requesting player already has a survivor on the accepting players roster
+            if (mysql_num_rows($MS_YG_requesting_query) > 0) {
+                //permenantly boost stats, and set to full stamina
+                $MS_YG_data = mysql_fetch_assoc($MS_YG_requesting_query);
+                $new_stam = $MS_YG_data['base_stam']+10;
+                $new_attk = $MS_YG_data['base_attack']+1;
+                $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
+            } else {
+                //insert the requesting survivor onto the accepting players survivor roster
+                $surv_name = $requesting_survivor_data['name'];
+                $surv_stam = $requesting_survivor_data['base_stam'];
+                $surv_attk = $requesting_survivor_data['base_attack'];
+                $pic_url = $requesting_survivor_data['profile_pic_url'];
+                $requesting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$accept_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$request_id', '$pic_url')") or die(mysql_error());
+            }
+
+            //update player_sheet with resource bonus
+            $accepting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
+            $requesting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error()); 
+
+           ;
+            array_push($returnArray, $requesting_survivor_data);
+
+        } else {
+            array_push($returnArray, "Failed");
+            array_push($returnArray, "Users have paired within 12 hours");
+        }
+
     } else {
-        array_push($returnArray, "failed");
-        $json_return = json_encode($returnArray);
-        echo $json_return;
+        //these players have not paired before
+        
+        //create the QR pairing record
+        $QR_insert = mysql_query("INSERT INTO qr_pairs (id_1, id_2, pair_ts, pairing_count) VALUES ('$accept_id', '$request_id', NOW(), 1)") or die(mysql_error());
+        if (mysql_affected_rows() >0) {
+            array_push($returnArray, "Success");
+        } else {
+            array_push($returnArray, "Failed");
+            array_push($returnArray, "Unable to create the QR record");
+            die(json_encode($returnArray));
+        }
+
+        //insert new survivors onto eachother's survivor roster.
+        $accepting_survivor_data = mysql_fetch_assoc($accepting_survivor_game_data);
+        $requesting_survivor_data = mysql_fetch_assoc($requesting_survivor_game_data);
+        
+        //if the accepting player already has a survivor on the requesting players roster
+        if (mysql_num_rows($MS_YG_accepting_query) > 0) {
+            $MS_YG_data = mysql_fetch_assoc($MS_YG_accepting_query);
+            $new_stam = $MS_YG_data['base_stam']+10;
+            $new_attk = $MS_YG_data['base_attack']+1;
+            $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error());
+        } else {
+            //insert the accepting survivor onto the requesting players survivor roster
+            $surv_name = $accepting_survivor_data['name'];
+            $surv_stam = $accepting_survivor_data['base_stam'];
+            $surv_attk = $accepting_survivor_data['base_attack'];
+            $pic_url = $accepting_survivor_data['profile_pic_url'];
+            $accepting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$request_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$accept_id', '$pic_url')") or die(mysql_error());
+        }
+        if (mysql_affected_rows() < 1) {
+            array_push($returnArray, "Failed");
+            array_push($returnArray, "accepting survivor failed to create a record on the requesting players survivor roster");
+            die(json_encode($returnArray));
+        }
+        //if the requesting player already has a survivor on the accepting players roster
+        if (mysql_num_rows($MS_YG_requesting_query) > 0) {
+            //permenantly boost stats, and set to full stamina
+            $MS_YG_data = mysql_fetch_assoc($MS_YG_requesting_query);
+            $new_stam = $MS_YG_data['base_stam']+10;
+            $new_attk = $MS_YG_data['base_attack']+1;
+            $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
+        } else {
+            //insert the requesting survivor onto the accepting players survivor roster
+            $surv_name = $requesting_survivor_data['name'];
+            $surv_stam = $requesting_survivor_data['base_stam'];
+            $surv_attk = $requesting_survivor_data['base_attack'];
+            $pic_url = $requesting_survivor_data['profile_pic_url'];
+            $requesting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$accept_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$request_id', '$pic_url')") or die(mysql_error());
+        }
+        if (mysql_affected_rows() < 1) {
+            array_push($returnArray, "Failed");
+            array_push($returnArray, "requesting survivor failed to create a record on the accepting players survivor roster");
+            die(json_encode($returnArray));
+        }
+
+        //update player_sheet with resource bonus
+        $accepting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
+        $requesting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error());
+
+        array_push($returnArray, $requesting_survivor_data);
     }
+
 } else {
-array_push($returnArray, "failed");
-$json_return = json_encode($returnArray);
-echo $json_return;
+    array_push($returnArray, "Failed");
+    array_push($returnArray, "requesting id not set");
 }
+
+$json_return = json_encode($returnArray, JSON_NUMERIC_CHECK);
+echo $json_return;
 
 // QR_FriendRequest.php
 ?>

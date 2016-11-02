@@ -40,7 +40,12 @@ if(($_POST['client'] != "web") and ($_POST['client'] != "mob")) {
 if($login_ts == "12/31/1999 11:59:59") {
     if($_POST['client'] == "web") $updateqry = "UPDATE player_sheet SET web_login_ts=now() WHERE id = '$id'";
     else $updateqry = "UPDATE player_sheet SET mob_login_ts=now() WHERE id = '$id'";
-    mysql_query($updateqry);    
+    mysql_query($updateqry);   
+	if(mysql_affected_rows() == 0) {
+        if($client == "web") $updateqry = "INSERT into player_sheet (id, web_login_ts) VALUE ('$id', now())";
+        else $updateqry = "INSERT into player_sheet (id, mob_login_ts) VALUE ('$id', now())";
+        mysql_query($updateqry);
+    } 
     $usrqry = "SELECT * FROM player_sheet WHERE id = '$id'";
 } else {
     if($_POST['client'] == "web") $usrqry = "SELECT * FROM player_sheet WHERE id = '$id' AND web_login_ts = '$login_ts'";
