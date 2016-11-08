@@ -23,52 +23,65 @@ if(isset($_POST["id"])) {
                 $previous_equipped_weapon_id = $row2['weapon_equipped'];
 
                 //this checks if the weapon already belongs to another survivor.
+                $rec_unequips=0;
                 if ($equipped_survivor_id > 0) {
                     //Set the survivor to unequipped.
                     $unequip_old_survivor_update = mysql_query("UPDATE survivor_roster SET weapon_equipped=0 WHERE owner_id='$owner_id' AND entry_id='$equipped_survivor_id'") or die(mysql_error());
+                    if (mysql_affected_rows()>0) {
+                        $rec_unequips++;
+                    }
                 }
                 //check for a previously equipped weapon on the survivor
                 if ($previous_equipped_weapon_id > 0) {
                     //set the weapon to unequipped.
                     $unequip_old_weapon_update = mysql_query("UPDATE active_weapons SET equipped_id=0 WHERE owner_id='$owner_id' AND weapon_id='$previous_equipped_weapon_id'") or die(mysql_query());
+                    if (mysql_affected_rows()>0) {
+                        $rec_unequips++;
+                    }
                 }
 
                 //update the weapon to it's new survivor
                 $new_weapon_update = mysql_query("UPDATE active_weapons SET equipped_id='$survivor_id' WHERE owner_id='$owner_id' AND weapon_id='$weapon_id'") or die(mysql_error());
-                //update the survivor record.
-                $survivor_update = mysql_query("UPDATE survivor_roster SET weapon_equipped='$weapon_id' WHERE owner_id='$owner_id' AND entry_id='$survivor_id'") or die(mysql_error());
-
-                array_push($return_array, "Success");
-                array_push($return_array, "Weapon successfully equipped");
-                $json_return = json_encode($return_array);
-                echo $json_return;
+                
+                if (mysql_affected_rows() > 0) {
+                    
+                    //update the survivor record.
+                    $survivor_update = mysql_query("UPDATE survivor_roster SET weapon_equipped='$weapon_id' WHERE owner_id='$owner_id' AND entry_id='$survivor_id'") or die(mysql_error());
+                    if (mysql_affected_rows() > 0) {
+                        array_push($return_array, "Success");
+                        array_push($return_array, "Weapon successfully equipped");
+                    }else {
+                        array_push($return_array, "Failed");
+                        array_push($return_array, "unable to update the surivor record");
+                    }
+                } else {
+                    array_push($return_array, "Failed");
+                    array_push($return_array, "unable to update the weapon record");
+                }
+                
 
             } else {
                 array_push($return_array, "Failed");
                 array_push($return_array, "server returning more than one of this exact weapon");
-                $json_return = json_encode($return_array);
-                echo $json_return;
+
             }
         }else{
             array_push($return_array, "Failed");
             array_push($return_array, "Weapon ID not set");
-            $json_return = json_encode($return_array);
-            echo $json_return;
         }
     } else {
         array_push($return_array, "Failed");
         array_push($return_array, "survivor id not set");
-        $json_return = json_encode($return_array);
-        echo $json_return;
     }
 
 } else {
     
     array_push($return_array, "Failed");
     array_push($return_array, "user id not set");
-    $json_return = json_encode($return_array);
-    echo $json_return;
 }
+array_push($return_array, $rec_unequips);
+$json_return = json_encode($return_array);
+echo $json_return;
 
 // EquipWeapon.php
 ?>

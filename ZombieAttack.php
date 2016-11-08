@@ -11,9 +11,14 @@ if ($id <> '') {
     if ($survivor_id <> '') {
         if ($damage <> '') {
             //update the player stamina 
-            $survivor_update = mysql_query("UPDATE survivor_roster SET curr_stam=curr_stam-$damage WHERE entry_id='$survivor_id' AND owner_id='$id' AND curr_stam>$damage") or die(mysql_error());
+            $survivor_update = mysql_query("UPDATE survivor_roster SET curr_stam=curr_stam-$damage WHERE entry_id='$survivor_id' AND owner_id='$id'") or die(mysql_error());
             if (mysql_affected_rows() == 0){
-                $survivor_update = mysql_query("UPDATE survivor_roster SET curr_stam=0 WHERE entry_id='$survivor_id' and owner_id='$id'") or die(mysql_error());
+                array_push($returnArray, "Failed");
+                array_push($returnArray, "Failed to update survivor roster");
+                //$survivor_update = mysql_query("UPDATE survivor_roster SET curr_stam=0 WHERE entry_id='$survivor_id' and owner_id='$id'") or die(mysql_error());
+            } else {
+                array_push($returnArray, "Success");
+                array_push($returnArray, "successfully updated the server records");
             }
 
         } else {

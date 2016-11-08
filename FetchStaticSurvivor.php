@@ -4,7 +4,7 @@
     if (isset($_POST['id'])) {
         $id = protect($_POST['id']);
         
-        $survivor_query = "SELECT * FROM static_survivors";
+        $survivor_query = "SELECT * FROM static_survivors ORDER BY RAND()";
         $survivordata = mysql_query($survivor_query) or die(mysql_error());
     
         $return_array = array();
@@ -13,7 +13,7 @@
         if (mysql_num_rows($survivordata) > 0 ) {
             array_push($return_array, "Success");
             while ($row = mysql_fetch_assoc($survivordata)) {
-                array_push($survivordataarr, array("name" => $row['name'], "base_stam" => $row['base_stam'], "base_attack" => $row['base_attack'], "sheet_id" => $row['sheet_id']));
+                array_push($survivordataarr, $row);
             }
             array_push($return_array, $survivordataarr);
             $jsondata = json_encode($return_array, JSON_NUMERIC_CHECK);

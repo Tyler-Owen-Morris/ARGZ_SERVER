@@ -13,6 +13,7 @@ if ($id <> '') {
         $main_knife_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id = 4") or die(mysql_error());
         $main_club_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id = 5") or die(mysql_error());
         $main_gun_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id = 3") or die(mysql_error());
+        $shotgun_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id = 6") or die(mysql_error());
         $weak_knife_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id = 1") or die(mysql_error());
         $weak_club_query = mysql_query("SELECT * FROM static_weapon_classes WHERE wep_id = 2") or die(mysql_error());
         
@@ -20,11 +21,13 @@ if ($id <> '') {
         $main_knife_data = mysql_fetch_assoc($main_knife_query);
         $main_club_data = mysql_fetch_assoc($main_club_query);
         $main_gun_data = mysql_fetch_assoc($main_gun_query);
+        $shotgun_data = mysql_fetch_assoc($shotgun_query);
         $weak_knife_data = mysql_fetch_assoc($weak_knife_query);
         $weak_club_data = mysql_fetch_assoc($weak_club_query);
 
         //match the weapon to the choice.
         if ($wep_choice == "knife") {
+            //create the weapons and ssociate them to the player entries
             while  ($survivor = mysql_fetch_assoc($survivor_query)) {
                 $surv_id = $survivor['entry_id'];
                 $team_pos = $survivor['team_position'];
@@ -74,6 +77,18 @@ if ($id <> '') {
                     $insert_wep = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, base_dmg, modifier, durability, stam_cost) VALUES ('$id', '$surv_id', '$wep_name', '$wep_type', '$wep_base_dmg', '$wep_modifier', '$wep_durability', '$wep_stam_cost' )") or die(mysql_error());
                 }
             }
+
+            //create the completed weapons at players Homebase.
+            $shotgun_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'shotgun', 0, NOW(), 6)") or die(mysql_error());
+            $baseball_bat_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'baseball bat', 0, NOW(), 2)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+
             array_push ($return_array, "Success");
             array_push ($return_array, "Player has successfully equipped a hunting knife");
 
@@ -127,6 +142,21 @@ if ($id <> '') {
                     $insert_wep = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, base_dmg, modifier, durability, stam_cost) VALUES ('$id', '$surv_id', '$wep_name', '$wep_type', '$wep_base_dmg', '$wep_modifier', '$wep_durability', '$wep_stam_cost' )") or die(mysql_error());
                 }
             }
+
+            $twentytwo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', '.22 Revolver', 0, NOW(), 3)") or die(mysql_error());
+            $sledgehammer_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'sledgehammer', 0, NOW(), 5)") or die(mysql_error());
+            $sledgehammer_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'sledgehammer', 0, NOW(), 5)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+
             array_push ($return_array, "Success");
             array_push ($return_array, "Player has successfully equipped a sledghammer");
 
@@ -170,6 +200,16 @@ if ($id <> '') {
                     $insert_wep = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, base_dmg, modifier, durability, stam_cost) VALUES ('$id', '$surv_id', '$wep_name', '$wep_type', '$wep_base_dmg', '$wep_modifier', '$wep_durability', '$wep_stam_cost' )") or die(mysql_error());
                 }
             }
+
+            $twentytwo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', '.22 Revolver', 0, NOW(), 3)") or die(mysql_error());
+            $sledgehammer_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'sledgehammer', 0, NOW(), 5)") or die(mysql_error());
+            $baseball_bat_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'baseball bat', 0, NOW(), 2)") or die(mysql_error());
+            $hunting_knife_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'hunting knife', 0, NOW(), 4)") or die(mysql_error());
+            $shiv_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'crude shiv', 0, NOW(), 1)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
+            $ammo_insert = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id', 'ammo', 0, NOW(), 0)") or die(mysql_error());
 
             //add 30 ammo to the player_sheet
             $ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+30 WHERE id='$id'") or die(mysql_error());

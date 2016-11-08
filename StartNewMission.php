@@ -71,7 +71,7 @@ if ($id <> '') {
                     //attempt to update the building entry
                     $now = 'now()';
                     $interval_string1 = "interval $duration minute";
-                    $building_update = mysql_query("UPDATE cleared_buildings SET active=0 AND time_cleared=date_add($now, $interval_string1) WHERE id='$id' AND bldg_id='$building_id'") or die(mysql_error());
+                    $building_update = mysql_query("UPDATE cleared_buildings SET active=0, time_cleared=date_add($now, $interval_string1), supply=supply-$supply_found, food=food-$food_found, water=water-$water_found WHERE id='$id' AND bldg_id='$building_id'") or die(mysql_error());
                     if(mysql_affected_rows() > 0) {
                         array_push($return_array, "Success");
                         array_push($return_array, "Mission added, and building set to inactive.");

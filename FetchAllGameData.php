@@ -83,14 +83,39 @@
     $player_data_array = mysql_fetch_assoc($player_query);
 
     //survivor data
-    $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' ORDER BY team_position DESC, onMission ASC") or die(mysql_error());
+    //First get team. Correct is missing team members...
+    $team_pos = 5;
+    $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' AND team_position > 0 ORDER BY team_position DESC") or die(mysql_error());
     $survivor_data_array = array();
+    $survivor_count = mysql_num_rows($survivor_query);
     if (mysql_num_rows($survivor_query) > 0) {
-        while ($survivor = mysql_fetch_assoc($survivor_query)) 
+        while ($survivor = mysql_fetch_assoc($survivor_query)) {
+            if($survivor['team_position'] != $team_pos) {
+                $survivor['team_position'] = $team_pos;
+                mysql_query("UPDATE survivor_roster SET team_position=".$survivor['team_position']." WHERE entry_id=".$survivor['entry_id']) or die(mysql_error());
+            }
             array_push($survivor_data_array, $survivor);
-    } else {
-        $survivor_data_array = null;
+            $team_pos--;
+        }
+        if($team_pos > 0) {
+            $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' AND team_position = 0 AND onMission = 0 LIMIT $team_pos") or die(mysql_error());
+            while ($survivor = mysql_fetch_assoc($survivor_query)) {
+                $survivor['team_position'] = $team_pos;
+                mysql_query("UPDATE survivor_roster SET team_position=".$survivor['team_position']." WHERE entry_id=".$survivor['entry_id']);
+                array_push($survivor_data_array, $survivor);
+                $team_pos--;
+            }
+        }
     }
+    //Select everyone else...
+    $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' AND team_position = 0 ORDER BY onMission ASC") or die(mysql_error());
+    $survivor_count += mysql_num_rows($survivor_query);
+    if (mysql_num_rows($survivor_query) > 0)
+        while ($survivor = mysql_fetch_assoc($survivor_query))
+            array_push($survivor_data_array, $survivor);
+
+    if($survivor_count == 0)
+        $survivor_data_array = null;
 
     //weapon data
     $weapon_data = mysql_query("SELECT * FROM active_weapons WHERE owner_id='$id'") or die(mysql_error());
