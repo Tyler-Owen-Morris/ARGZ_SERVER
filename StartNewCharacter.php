@@ -52,7 +52,7 @@ if(isset($_POST['id'])){
         //4) if there is a homebase, reset all data for homebase_sheet
         $home_query = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
         if (mysql_num_rows($home_query) > 0 ) {
-            $update2 = mysql_query("UPDATE homebase_sheet SET supply=0, knife_for_pickup=0, club_for_pickup=0, ammo_for_pickup=0, gun_for_pickup=0, active_survivor_for_pickup=0, inactive_survivors=0 WHERE id = '$id'") or die(mysql_error());
+            $update2 = mysql_query("UPDATE homebase_sheet SET supply=0 WHERE id = '$id'") or die(mysql_error());
         }
 
         //5) Remove all cleared buildings from the cleared_buildings table

@@ -28,9 +28,19 @@ if ($id <> '') {
                 }
             }
         }
-        array_push($returnArray, "Success");
-        array_push($returnArray, "Stamina successfully added to characters");
-        array_push($returnArray, $survivor_array);
+		
+		$player_update = mysql_query("UPDATE player_sheet SET last_stamina_regen=NOW() WHERE id='$id'") or die(mysql_query());
+		
+		if (mysql_affected_rows()>0){
+			array_push($returnArray, "Success");
+        	array_push($returnArray, "Stamina successfully added to characters");
+        	array_push($returnArray, $survivor_array);
+		}else{
+			array_push($returnArray, "Failed");
+			array_push($returnArray, "failed to update offline stam regen timestamp");
+		}
+		
+        
     } else {
         array_push($returnArray, "Failed");
         array_push($returnArray, "Stamina regen not sent");

@@ -14,7 +14,7 @@ if (isset($_POST['id'])) {
     if (mysql_num_rows($weaponquery1) > 0) {
         while ($weapon = mysql_fetch_assoc($weaponquery1)) {
             $entry_id = $weapon['entry_id'];
-            $wep_name = $weapon['wep_name'];
+            $wep_type = $weapon['type'];
             $index = $weapon['weapon_index'];//this corresponds to it's index on the static table for crafted weapon templates
             
             //index 0 means that it's ammunition
@@ -36,12 +36,21 @@ if (isset($_POST['id'])) {
             
                 $insert = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability) values ('$id', 0, '$weapon_name', '$weapon_type', '$weapon_stam_cost', '$weapon_base_dmg', '$weapon_modifier', '$weapon_durability')") or die(mysql_error());
                 $weapon_string += " creating weapon record";
-            } else {
-                //increment the players ammo up by 1
-                $ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+5 WHERE id = '$id'") or die(mysql_error());
-                $weapon_string += " adding ammo";
+				
+			} else {
+				if ($wep_type == "trap"){
+					$trap_update  = mysql_query("UPDATE player_sheet SET trap=trap+1 WHERE id='$id'") or die(mysql_error());
+				} else if ($wep_type == "barrel") {
+					$barrel_update = mysql_query("UPDATE player_sheet SET barrel=barrel+1 WHERE id='$id'") or die(mysql_error());
+				}else if ($wep_type == "greenhouse"){
+					$greenhouse_udpate = mysql_query("UPDATE player_sheet SET greenhouse=greenhouse+1 WHERE id='$id'") or die(mysql_error());
+				}else{
+					 //increment the players ammo up by 1
+                	$ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+5 WHERE id = '$id'") or 		die(mysql_error());
+                	$weapon_string += " adding ammo";
+				}
             }
-           // $insert = mysql_query("INSERT into active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability) SELECT '$id' as owner_id, '0' as equipped_id, name, type, stam_cost, base_dmg, modifier, durability from static_weapons_classes where type='$type'") or die(mysql_error());
+           
 
             //remove the expired entry from the crafting database
             $delete1 = mysql_query("DELETE FROM weapon_crafting WHERE entry_id='$entry_id' AND id='$id'") or die(mysql_error());

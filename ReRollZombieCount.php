@@ -7,7 +7,8 @@ $bldg_id = isset($_POST['bldg_id']) ? protect($_POST['bldg_id']) : '';
 $zombie_count = isset($_POST['zombie_count']) ? protect($_POST['zombie_count']) : '';
 
 if ( $bldg_name <> '' || $bldg_id <> '' || $zombie_count <> '' ) {
-    $bldg_update = mysql_query("UPDATE cleared_buildings SET zombies='$zombie_count' WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
+	$time = "2000-01-01 00:01:00";
+    $bldg_update = mysql_query("UPDATE cleared_buildings SET zombies='$zombie_count', time_cleared='$time' WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
     if (mysql_affected_rows() > 0) {
         array_push($return_array, "Success");
         array_push($return_array, "Zombie count updated");

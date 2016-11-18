@@ -4,8 +4,8 @@
     $return_array = array();
 
     //evaluate eating/drinking
-    $meals_query = mysql_query("SELECT FLOOR(HOUR(TIMEDIFF(NOW(), char_created_DateTime))/6) as total_meals, meals, food, water, char_created_DateTime FROM player_sheet WHERE id='$id'");
-    $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$id' AND dead=0");
+    $meals_query = mysql_query("SELECT FLOOR(HOUR(TIMEDIFF(NOW(), char_created_DateTime))/6) as total_meals, meals, food, water, char_created_DateTime FROM player_sheet WHERE id='$id'") or die(mysql_error());
+    $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$id' AND dead=0") or die(mysql_error());
     $meals_data = mysql_fetch_assoc($meals_query);
     $survivor_data = mysql_fetch_assoc($survivor_query);
     $curr_meals = intval($meals_data["meals"]);
@@ -57,6 +57,57 @@
         }
     }
 
+
+	//player data
+    $player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
+    $player_data_array = mysql_fetch_assoc($player_query);
+
+	//evaluate offline stamina regen
+	$survivor_array = array();//for returning regen'd charcters by ID
+	$minutes_query = mysql_query("SELECT FLOOR(MINUTE(TIMEDIFF(NOW(), last_stamina_regen))/2) as stam_regen_ticks FROM player_sheet WHERE id='$id'") or die(mysql_error());
+	$hours_query = mysql_query("SELECT FLOOR(HOUR(TIMEDIFF(NOW(), last_stamina_regen))) as stam_regen_hr FROM player_sheet WHERE id='$id'") or die(mysql_error());
+	$minutes_data = mysql_fetch_assoc($minutes_query);
+	$hours_data = mysql_fetch_assoc($hours_query);
+	$offline_regen_ticks = intval($minutes_data['stam_regen_ticks']);
+	$offline_regen_hrs = intval($hours_data['stam_regen_hr']);
+	array_push($survivor_array, $offline_regen_hrs." hrs offline, and ".$offline_regen_ticks." Ticks");
+
+	if ($offline_regen_hrs >= 1) { 
+		//1hr = 240 stamina... set all to full
+		$stamina_update = mysql_query("UPDATE survivor_roster SET curr_stam=base_stam WHERE owner_id='$id'") or die(mysql_error());
+		array_push($survivor_array, "all survivors set to full stamina");
+		$player_update = mysql_query("UPDATE player_sheet SET last_stamina_regen=NOW() WHERE id='$id'") or die(mysql_query());
+		
+	}else if ($offline_regen_ticks>=1){
+		$stam_to_regen = $offline_regen_ticks*4;
+		//Get all of the survivors that belong to the player
+		$survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$id'") or die(mysql_error());
+
+		//Loop through them for survivors w/o full stamina
+		while ($survivor_data = mysql_fetch_assoc($survivor_query)) {
+			$max_stam = $survivor_data['base_stam'];
+			$curr_stam = $survivor_data['curr_stam'];
+			$entry_id = $survivor_data['entry_id'];
+			//if the survivor is not full.
+			if ($curr_stam < $max_stam) {
+				if ($curr_stam+$stam_to_regen > $max_stam) {
+					$update = mysql_query("UPDATE survivor_roster SET curr_stam=base_stam WHERE entry_id='$entry_id' AND owner_id='$id'") or die(mysql_error());
+					array_push($survivor_array, $entry_id." Set to full");
+				} else {
+					$new_stam= $curr_stam+$stam_to_regen;
+					$update = mysql_query("UPDATE survivor_roster SET curr_stam='$new_stam' WHERE entry_id='$entry_id' AND owner_id='$id'") or die(mysql_error());
+					array_push($survivor_array, $entry_id." Set to ".$new_stam." stam");
+				}
+			}
+		}
+		$player_update = mysql_query("UPDATE player_sheet SET last_stamina_regen=NOW() WHERE id='$id'") or die(mysql_query());
+	}
+	
+	
+	array_push($survivor_array, "Calculated ".$offline_regen_ticks." offline regen ticks for a total stam of: ".$offline_regen_ticks*4);
+	
+
+
     //evaluate injury data
     $injury_query = mysql_query("SELECT * FROM injury_table WHERE owner_id='$id' AND expire_time<Now()") or die(mysql_error());
     if (mysql_num_rows($injury_query) > 0) {
@@ -77,10 +128,7 @@
     } else {
         $active_injury_array = null;
     }
-
-    //player data
-    $player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
-    $player_data_array = mysql_fetch_assoc($player_query);
+	
 
     //survivor data
     //First get team. Correct is missing team members...
@@ -178,6 +226,7 @@
     array_push($return_array, $mission_data_array);
     array_push($return_array, $death_data_array);
     array_push($return_array, $active_injury_array);
+	array_push($return_array, $survivor_array);//this is actually stamina regenerated survivor array
 
     echo json_encode($return_array, JSON_NUMERIC_CHECK);
 ?>
