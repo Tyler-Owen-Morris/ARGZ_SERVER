@@ -3,7 +3,7 @@
 
     $return_array = array();
 
-    $clear_dead_query = mysql_query("DELETE FROM survivor_roster WHERE owner_id='$id' AND dead=1 AND onMission=0 ") or die(mysql_error());
+    $clear_dead_query = $mysqli->query("DELETE FROM survivor_roster WHERE owner_id='$id' AND dead=1 AND onMission=0 ") or die($mysqli->error());
 
     if (mysql_affected_rows() > 0) {
         array_push ($return_array, "Success");

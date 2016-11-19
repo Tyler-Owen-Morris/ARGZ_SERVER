@@ -5,15 +5,15 @@ $return_array = array();
 if (isset($_POST['id'])){
     $id = protect($_POST['id']);
     //get the weapons still being worked on
-    $query1 = mysql_query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete > NOW() ORDER BY time_complete ASC") or die(mysql_error());
+    $query1 = $mysqli->query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete > NOW() ORDER BY time_complete ASC") or die($mysqli->error());
     //get the weapons to expire
-    $query2 = mysql_query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete < NOW() ORDER BY time_complete DESC") or die(mysql_error());
+    $query2 = $mysqli->query("SELECT * FROM weapon_crafting WHERE id='$id' AND time_complete < NOW() ORDER BY time_complete DESC") or die($mysqli->error());
     
     
     $weapon_inprogress_array = array();
     //construct the weapons in progress into an array
-    if (mysql_num_rows($query1) > 0) {
-        while ($weapon = mysql_fetch_assoc($query1)) {
+    if ($query1->num_rows > 0) {
+        while ($weapon = $query1->fetch_assoc()) {
             $entry_id = $weapon['entry_id'];
             $type = $weapon['type'];
             $duration = $weapon['duration'];
@@ -29,8 +29,8 @@ if (isset($_POST['id'])){
     
     $completed_array = array();
     //construct the weapons completed into an array.
-    if(mysql_num_rows($query2) > 0){
-        while ($weapon = mysql_fetch_assoc($query2)) {
+    if($query2->num_rows > 0){
+        while ($weapon = $query2->fetch_assoc()) {
             $entry_id = $weapon['entry_id'];
             $type = $weapon['type'];
             $duration = $weapon['duration'];

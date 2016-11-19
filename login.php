@@ -8,7 +8,7 @@ if(isset($_POST['email'])) {
         $password = protect($_POST['password']);
         
         if(filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $login_check = mysql_query("SELECT id FROM user_sheet WHERE email = '$email' AND password = '".md5($password)."'") or die(mysql_error);
+            $login_check = $mysqli->query("SELECT id FROM user_sheet WHERE email = '$email' AND password = '".md5($password)."'") or die(mysql_error);
             if (mysql_num_rows($login_check) == 0) {
                 echo "Incorrect email or password";
             } else {

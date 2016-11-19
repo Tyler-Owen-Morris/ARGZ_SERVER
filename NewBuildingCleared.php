@@ -20,11 +20,11 @@ if ($id <> '') {
 		$bldg_water = 0;
 		
         //find the matching building entry
-        $existing_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
+        $existing_query = $mysqli->query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_name='$bldg_name'") or die($mysqli->error());
 
-        if (mysql_num_rows($existing_query) > 0) {
+        if ($existing_query->num_rows > 0) {
             //store the supplies and loot timer
-            $bldg_data = mysql_fetch_assoc($existing_query);
+            $bldg_data = $existing_query->fetch_assoc();
 			$supply_last_looted = $bldg_data['last_looted_supply'];
             $bldg_supply = $bldg_data['supply'];
             $bldg_food = $bldg_data['food'];
@@ -60,18 +60,18 @@ if ($id <> '') {
 			}
 			
 			//update the building entry
-            $bldg_update = mysql_query("UPDATE cleared_buildings SET active=0, time_cleared=NOW(), food=0, water=0, supply=0, has_trap='$has_trap', has_barrel='$has_barrel', has_greenhouse='$has_greenhouse', zombies=-1 WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
+            $bldg_update = $mysqli->query("UPDATE cleared_buildings SET active=0, time_cleared=NOW(), food=0, water=0, supply=0, has_trap='$has_trap', has_barrel='$has_barrel', has_greenhouse='$has_greenhouse', zombies=-1 WHERE id='$id' AND bldg_name='$bldg_name'") or die($mysqli->error());
 			//resources are set to 0 for all clears. fabricated resources are calculated on the fly.
 			
-			if (mysql_affected_rows()>0){
+			if ($bldg_update->affected_rows > 0){
 				
 				//if the building has never been looted before- auto-transfer resources.
 				$unlooted_time = "2000-01-01 00:01:00"; //new entries store this as their un-looted time
 				$loot_string = "";
 				if ($supply_last_looted==$unlooted_time){
-					$player_update = mysql_query("UPDATE player_sheet SET supply=supply+$bldg_supply, food=food+$bldg_food, water=water+$bldg_water WHERE id='$id'") or die(mysql_error());
-					$bldg_update2 = mysql_query("UPDATE cleared_buildings SET last_looted_supply=NOW(), last_looted_food=NOW(), last_looted_water=NOW() WHERE id='$id' AND bldg_name='$bldg_name'")or die(mysql_error());
-					if (mysql_affected_rows()>0){
+					$player_update = $mysqli->query("UPDATE player_sheet SET supply=supply+$bldg_supply, food=food+$bldg_food, water=water+$bldg_water WHERE id='$id'") or die($mysqli->error());
+					$bldg_update2 = $mysqli->query("UPDATE cleared_buildings SET last_looted_supply=NOW(), last_looted_food=NOW(), last_looted_water=NOW() WHERE id='$id' AND bldg_name='$bldg_name'")or die($mysqli->error());
+					if ($player_update->affected_rows>0){
 						$loot_string = "";
 					} else {
 						array_push($return_array, "Failed");
@@ -79,7 +79,7 @@ if ($id <> '') {
 						die(json_encode($return_array, JSON_NUMERIC_CHECK));
 					}
 					
-					if (mysql_affected_rows()>0){
+					if ($bldg_update2->affected_rows > 0){
 						$loot_string ="Player has been awarded all building resources";
 					}else{
 						array_push($return_array, "Failed");
@@ -125,32 +125,38 @@ if ($id <> '') {
 		*/
 
         //if there's a survivor found- then create them on the table
-        if ($survivor_found == 1) {
-            //pull data from a radom static survivor
-            $static_survivor_query = mysql_query("SELECT * FROM static_survivors ORDER BY RAND() LIMIT 1") or die(mysql_error());
-            $survivor_row = mysql_fetch_assoc($static_survivor_query);
-            $survivor_name = $survivor_row['name'];
-            $survivor_stam = $survivor_row['base_stam'];
-            $survivor_attack = $survivor_row['base_attack'];
-            $survivor_pic_url = $survivor_row['profile_pic_url'];
+        if ($survivor_found > 0) {
+			
+			$new_survivor_array = array();
+			for ( $i=0; $i < $survivor_found; $i++){
+				//pull data from a radom static survivor
+				$static_survivor_query = $mysqli->query("SELECT * FROM static_survivors ORDER BY RAND() LIMIT 1") or die($mysqli->error());
+				$survivor_row = $static_survivor_query->fetch_assoc();
+				$survivor_name = $survivor_row['name'];
+				$survivor_stam = $survivor_row['base_stam'];
+				$survivor_attack = $survivor_row['base_attack'];
+				$survivor_pic_url = $survivor_row['profile_pic_url'];
 
-            //find the lowest team position survivor, or use 0 - "not on team" 
-            $survivor_pos_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$id' ORDER BY team_position ASC LIMIT 1") or die(mysql_error());
-            $survivor_pos_row = mysql_fetch_assoc($survivor_pos_query);
-            $lowest_team_pos = $survivor_pos_row['team_position'];
-            $team_pos = 0;
-            if ($lowest_team_pos-1 <= 0) {
-                $team_pos = 0;
-            } else {
-                $team_pos = $lowest_team_pos-1;
-            }
+				//find the lowest team position survivor, or use 0 - "not on team" 
+				$survivor_pos_query = $mysqli->query("SELECT * FROM survivor_roster WHERE owner_id='$id' ORDER BY team_position ASC LIMIT 1") or die($mysqli->error());
+				$survivor_pos_row = $survivor_pos_query->fetch_assoc();
+				$lowest_team_pos = $survivor_pos_row['team_position'];
+				$team_pos = 0;
+				if ($lowest_team_pos-1 <= 0) {
+					$team_pos = 0;
+				} else {
+					$team_pos = $lowest_team_pos-1;
+				}
 
-            //create the new survivor record
-            $insert_survivor = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, profile_pic_url) VALUES ('$id', '$survivor_name', '$survivor_stam', '$survivor_stam', '$survivor_attack', '0', 1, NOW(), '$team_pos', '$survivor_pic_url')") or die(mysql_error());
-            //construct the array of the survivor data to add to the return.
-            $insert_id=mysql_insert_id();
-            $new_survivor_array = array("entry_id"=>$insert_id, "owner_id"=>$id, "name"=>$survivor_name, "base_stam"=>$survivor_stam, "base_attack"=>$survivor_attack);
-            array_push($return_array, 1);
+				//create the new survivor record
+				$insert_survivor = $mysqli->query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, profile_pic_url) VALUES ('$id', '$survivor_name', '$survivor_stam', '$survivor_stam', '$survivor_attack', '0', 1, NOW(), '$team_pos', '$survivor_pic_url')") or die($mysqli->error());
+				//construct the array of the survivor data to add to the return.
+				$insert_id=$mysqli->insert_id;
+				array_push($new_survivor_array, $survivor_row);
+			}
+			
+			
+            array_push($return_array, $survivor_found);
             array_push($return_array, $new_survivor_array);
         } else {
             array_push($return_array, 0);

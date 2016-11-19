@@ -11,10 +11,10 @@ $type = isset($_POST['type']) ? protect($_POST['type']) : '';
 if ($id <> ''){
     if ($bldg_name<>''||$bldg_id<>''||$type<>'') {
 		if ($type == "trap"){
-			$bldg_update = mysql_query("UPDATE cleared_buildings SET has_trap=1, last_looted_supply=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
-			if (mysql_affected_rows()>0){
-				$player_update = mysql_query("UPDATE player_sheet SET trap=trap-1 WHERE id='$id' AND trap>0") or die(mysql_error());
-				if (mysql_affected_rows()>0){
+			$bldg_update = $mysqli->query("UPDATE cleared_buildings SET has_trap=1, last_looted_supply=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die($mysqli->error());
+			if ($bldg_update->affected_rows > 0){
+				$player_update = $mysqli->query("UPDATE player_sheet SET trap=trap-1 WHERE id='$id' AND trap>0") or die($mysqli->error());
+				if ($player_update->affected_rows > 0){
 					array_push($return_array, "Success");
 					array_push($return_array, "player placed a zombie trap successfully");
 				}else{
@@ -23,10 +23,10 @@ if ($id <> ''){
 				}
 			}
 		}else if ($type=="barrel"){
-			$bldg_update = mysql_query("UPDATE cleared_buildings SET has_barrel=1, last_looted_water=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
-			if (mysql_affected_rows()>0){
-				$player_update = mysql_query("UPDATE player_sheet SET barrel=barrel-1 WHERE id='$id' AND barrel>0") or die(mysql_error());
-				if (mysql_affected_rows()>0){
+			$bldg_update = $mysqli->query("UPDATE cleared_buildings SET has_barrel=1, last_looted_water=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die($mysqli->error());
+			if ($bldg_update->affected_rows > 0){
+				$player_update = $mysqli->query("UPDATE player_sheet SET barrel=barrel-1 WHERE id='$id' AND barrel>0") or die($mysqli->error());
+				if ($player_update->affected_rows >0){
 					array_push($return_array, "Success");
 					array_push($return_array, "player placed a rain barrel successully");
 				}else{
@@ -35,10 +35,10 @@ if ($id <> ''){
 				}
 			}
 		}elseif($type=="greenhouse"){
-			$bldg_update = mysql_query("UPDATE cleared_buildings SET has_greenhouse=1, last_looted_food=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
-			if (mysql_affected_rows()>0){
-				$player_update = mysql_query("UPDATE player_sheet SET greenhouse=greenhouse-1 WHERE id='$id' AND greenhouse>0") or die(mysql_error());
-				if (mysql_affected_rows()>0){
+			$bldg_update = $mysqli->query("UPDATE cleared_buildings SET has_greenhouse=1, last_looted_food=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die($mysqli->error());
+			if ($bldg_update->affected_rows > 0){
+				$player_update = $mysqli->query("UPDATE player_sheet SET greenhouse=greenhouse-1 WHERE id='$id' AND greenhouse>0") or die($mysqli->error());
+				if ($player_update->affected_rows >0){
 					array_push($return_array, "Success");
 					array_push($return_array, "player successfully placed a greenhouse");
 				}else{

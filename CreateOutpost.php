@@ -16,11 +16,11 @@ if ($id <> '') {
             $interval_string = "interval $duration hour";
 
             $outpost_query = "INSERT INTO outpost_sheet (name, owner_id, outpost_lat, outpost_lng, expire_time, capacity) VALUES ('', '$id', '$outpost_lat', '$outpost_lng', date_add($start, $interval_string), '$capacity')";
-            $outpost_insert = mysql_query($outpost_query) or die(mysql_error());
+            $outpost_insert = $mysqli->query($outpost_query) or die($mysqli->error());
 
             //$outpost_insert = mysql_query("INSERT INTO outpost_sheet (name, owner_id, latitude, longitude, expire_time, capacity) VALUES ('', '$id', '$outpost_lat', '$outpost_lng', date_add($start, $interval_string), '$capacity')") or die(mysql_error());
 
-            if (mysql_affected_rows() > 0) {
+            if ($mysqli->affected_rows > 0) {
                 array_push ($return_array, "Success");
                 array_push ($return_array, "Player outpost successfully added to the database");
             } else {

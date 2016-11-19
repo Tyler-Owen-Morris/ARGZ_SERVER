@@ -5,14 +5,14 @@
         $id = protect($_POST['id']);
         
         $survivor_query = "SELECT * FROM static_survivors ORDER BY RAND()";
-        $survivordata = mysql_query($survivor_query) or die(mysql_error());
+        $survivordata = $mysqli->query($survivor_query) or die($mysqli->error());
     
         $return_array = array();
         $survivordataarr = array();
         
-        if (mysql_num_rows($survivordata) > 0 ) {
+        if ($survivordata->num_rows > 0 ) {
             array_push($return_array, "Success");
-            while ($row = mysql_fetch_assoc($survivordata)) {
+            while ($row = $survivordata->fetch_assoc()) {
                 array_push($survivordataarr, $row);
             }
             array_push($return_array, $survivordataarr);

@@ -10,10 +10,10 @@ $weapon_id = isset($_POST['weapon_id']) ? protect($_POST['weapon_id']) : '';
 if ($id <> '') {
     if ($survivor_id <> '') {
         if ($weapon_id <> '') {
-            $weapon_update = mysql_query("UPDATE active_weapons SET equipped_id=0 WHERE owner_id='$id' AND weapon_id='$weapon_id'") or die(mysql_error());
-            $survivor_update = mysql_query("UPDATE survivor_roster SET weapon_equipped=0 WHERE owner_id='$id' AND entry_id='$survivor_id'") or die(mysql_error());            
+            $weapon_update = $mysqli->query("UPDATE active_weapons SET equipped_id=0 WHERE owner_id='$id' AND weapon_id='$weapon_id'") or die($mysqli->error());
+            $survivor_update = $mysqli->query("UPDATE survivor_roster SET weapon_equipped=0 WHERE owner_id='$id' AND entry_id='$survivor_id'") or die($mysqli->error());            
 
-            if (mysql_affected_rows($weapon_update) > 0 && mysql_affected_rows($survivor_update) > 0) {
+            if ($weapon_update->affected_rows > 0 && $survivor_update->affected_rows > 0) {
                 array_push($return_array, "Success");
                 array_push($return_array, "Weapon and survivor records updated");
             }else {

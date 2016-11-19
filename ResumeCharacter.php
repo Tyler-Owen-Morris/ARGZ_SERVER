@@ -4,11 +4,11 @@
     include ("db_connect.php");
 
     $updateqry = "UPDATE player_sheet SET login_ts=now() WHERE id = '$id'";
-    mysql_query($updateqry);    
+    $mysqli->query($updateqry);    
     $usrqry = "SELECT * FROM player_sheet WHERE id = '$id'";
-    $userdata = mysql_query($usrqry);
+    $userdata = $mysqli->query($usrqry);
     
-    $rows = mysql_num_rows($userdata);
+    $rows = $userdata->num_rows;
     if($rows == 0) {
         array_push($return_array, "User has not started a character");
         echo json_encode($return_array, JSON_NUMERIC_CHECK);
@@ -20,7 +20,7 @@
     if($rows == 1) {
         $return_array = array();
         array_push($return_array, "Success");
-        array_push($return_array, mysql_fetch_assoc($userdata));
+        array_push($return_array, $userdata->fetch_assoc());
         echo json_encode($return_array, JSON_NUMERIC_CHECK);
     }
 ?>

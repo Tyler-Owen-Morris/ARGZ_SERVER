@@ -7,9 +7,9 @@ $survivor_id = isset($_POST['survivor_id']) ? protect($_POST['survivor_id']) : '
 
 if ($id <> ''){
     if ($survivor_id <> '') {
-        $update = mysql_query("UPDATE survivor_roster SET curr_stam=base_stam WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die(mysql_error());
+        $update = $mysqli->query("UPDATE survivor_roster SET curr_stam=base_stam WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die($mysqli->error());
 
-        if (mysql_affected_rows() > 0) {
+        if ($mysqli->affected_rows > 0) {
             array_push($returnArray, "Success");
             array_push($returnArray, "Survivor record was restored");
         } else {

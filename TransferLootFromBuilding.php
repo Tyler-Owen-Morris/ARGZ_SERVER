@@ -7,21 +7,21 @@ $bldg_id = isset($_POST['bldg_id']) ? protect($_POST['bldg_id']) : '';
 
 if ($id<>'' || $bldg_name<>'' || $bldg_id<>''){
     //find the building entry
-	$bldg_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_name='$bldg_name' LIMIT 1") or die(mysql_error());
+	$bldg_query = $mysqli->query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_name='$bldg_name' LIMIT 1") or die($mysqli->error());
 	
-	if (mysql_num_rows($bldg_query) > 0) {
+	if ($bldg_query->num_rows > 0) {
 		//get the 
-		$bldg_data = mysql_fetch_assoc($bldg_query);
+		$bldg_data = $bldg_query->fetch_assoc();
 		$bldg_supply = $bldg_data['supply'];
 		$bldg_food = $bldg_data['food'];
 		$bldg_water = $bldg_data['water'];
 		
-		$player_update = mysql_query("UPDATE player_sheet SET supply=supply+$bldg_supply, food=food+$bldg_food, water=water+$bldg_water WHERE id='$id'") or die(mysql_error());
+		$player_update = $mysqli->query("UPDATE player_sheet SET supply=supply+$bldg_supply, food=food+$bldg_food, water=water+$bldg_water WHERE id='$id'") or die($mysqli->error());
 		
-		if (mysql_affected_rows()>0){
+		if ($mysqli->affected_rows>0){
 			//set the building to empty
-			$bldg_update = mysql_query("UPDATE cleared_buildings SET supply=0, food=0, water=0, last_looted=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
-			if (mysql_affected_rows()>0){
+			$bldg_update = $mysqli->query("UPDATE cleared_buildings SET supply=0, food=0, water=0, last_looted=NOW() WHERE id='$id' AND bldg_name='$bldg_name'") or die($mysqli->error());
+			if ($mysqli->affected_rows >0){
 				array_push($return_array, "Success");
 				array_push($return_array, "successfully transfered all building contents to player");
 			}else{

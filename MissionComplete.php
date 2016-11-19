@@ -9,10 +9,10 @@ $mission_id = isset($_POST['mission_id']) ? protect($_POST['mission_id']) : '';
 if ($id <> '') {
     if ($mission_id <> '') {
         //load in the mission data to be executed
-        $mission_query = mysql_query("SELECT * FROM missions_table WHERE mission_id='$mission_id' AND owner_id='$id'") or die(mysql_error());
+        $mission_query = $mysqli->query("SELECT * FROM missions_table WHERE mission_id='$mission_id' AND owner_id='$id'") or die($mysqli->error());
 
-        if (mysql_num_rows($mission_query) > 0) {
-            $row = mysql_fetch_assoc($mission_query);
+        if ($mission_query->num_rows > 0) {
+            $row = $mission_query->fetch_assoc();
             
             //survivor1 updates
             $survivor1_id = $row['survivor1_id'];
@@ -21,13 +21,13 @@ if ($id <> '') {
 
             if($survivor1_dead == 1) {
                 //kill this survivor and move on
-                $surv1_delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor1_id' AND owner_id='$id'") or die(mysql_error());
+                $surv1_delete = $mysqli->query("DELETE FROM survivor_roster WHERE entry_id='$survivor1_id' AND owner_id='$id'") or die($mysqli->error());
             } else {
                 //update the survivor record with the new current stamina
                 if ($survivor1_curr_stam <= 0) {
                     $survivor1_curr_stam = 0;
                 }
-                $surv1_update = mysql_query("UPDATE survivor_roster SET curr_stam='$survivor1_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor1_id'") or die(mysql_error());
+                $surv1_update = $mysqli->query("UPDATE survivor_roster SET curr_stam='$survivor1_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor1_id'") or die($mysqli->error());
             }
             //survivor2 updates
             $survivor2_id = $row['survivor2_id'];
@@ -36,13 +36,13 @@ if ($id <> '') {
 
             if($survivor2_dead == 1) {
                 //kill this survivor and move on
-                $surv2_delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor2_id' AND owner_id='$id'") or die(mysql_error());
+                $surv2_delete = $mysqli->query("DELETE FROM survivor_roster WHERE entry_id='$survivor2_id' AND owner_id='$id'") or die($mysqli->error());
             } else {
                 //update the survivor record with the new current stamina
                 if ($survivor2_curr_stam <= 0) {
                     $survivor2_curr_stam = 0;
                 }
-                $surv2_update = mysql_query("UPDATE survivor_roster SET curr_stam='$survivor2_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor2_id'") or die(mysql_error());
+                $surv2_update = $mysqli->query("UPDATE survivor_roster SET curr_stam='$survivor2_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor2_id'") or die($mysqli->error());
             }
             //survivor3 updates
             $survivor3_id = $row['survivor3_id'];
@@ -51,13 +51,13 @@ if ($id <> '') {
 
             if($survivor3_dead == 1) {
                 //kill this survivor and move on
-                $surv3_delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor3_id' AND owner_id='$id'") or die(mysql_error());
+                $surv3_delete = $mysqli->query("DELETE FROM survivor_roster WHERE entry_id='$survivor3_id' AND owner_id='$id'") or die($mysqli->error());
             } else {
                 //update the survivor record with the new current stamina
                 if ($survivor3_curr_stam <= 0) {
                     $survivor3_curr_stam = 0;
                 }
-                $surv3_update = mysql_query("UPDATE survivor_roster SET curr_stam='$survivor3_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor3_id'") or die(mysql_error());
+                $surv3_update = $mysqli->query("UPDATE survivor_roster SET curr_stam='$survivor3_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor3_id'") or die($mysqli->error());
             }
             //survivor4 updates
             $survivor4_id = $row['survivor4_id'];
@@ -66,13 +66,13 @@ if ($id <> '') {
 
             if($survivor4_dead == 1) {
                 //kill this survivor and move on
-                $surv4_delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor4_id' AND owner_id='$id'") or die(mysql_error());
+                $surv4_delete = $mysqli->query("DELETE FROM survivor_roster WHERE entry_id='$survivor4_id' AND owner_id='$id'") or die($mysqli->error());
             } else {
                 //update the survivor record with the new current stamina
                 if ($survivor4_curr_stam <= 0) {
                     $survivor4_curr_stam = 0;
                 }
-                $surv4_update = mysql_query("UPDATE survivor_roster SET curr_stam='$survivor4_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor4_id'") or die(mysql_error());
+                $surv4_update = $mysqli->query("UPDATE survivor_roster SET curr_stam='$survivor4_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor4_id'") or die($mysqli->error());
             }
             //survivor5 updates
             $survivor5_id = $row['survivor5_id'];
@@ -81,13 +81,13 @@ if ($id <> '') {
 
             if($survivor5_dead == 1) {
                 //kill this survivor and move on
-                $surv5_delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor5_id' AND owner_id='$id'") or die(mysql_error());
+                $surv5_delete = $mysqli->query("DELETE FROM survivor_roster WHERE entry_id='$survivor5_id' AND owner_id='$id'") or die($mysqli->error());
             } else {
                 //update the survivor record with the new current stamina
                 if ($survivor5_curr_stam <= 0) {
                     $survivor5_curr_stam = 0;
                 }
-                $surv5_update = mysql_query("UPDATE survivor_roster SET curr_stam='$survivor5_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor5_id'") or die(mysql_error());
+                $surv5_update = $mysqli->query("UPDATE survivor_roster SET curr_stam='$survivor5_curr_stam', onMission=0 WHERE owner_id='$id' AND entry_id='$survivor5_id'") or die($mysqli->error());
             }
 
             //player stat updates
@@ -96,12 +96,12 @@ if ($id <> '') {
             $food = $row['food_found'];
             $ammo_used = $row['ammo_used'];
 
-            $player_update = mysql_query("UPDATE player_sheet SET supply=supply+$supply, water=water+$water, food=food+$food, ammo=ammo-$ammo_used WHERE id='$id'")or die(mysql_error());
+            $player_update = $mysqli->query("UPDATE player_sheet SET supply=supply+$supply, water=water+$water, food=food+$food, ammo=ammo-$ammo_used WHERE id='$id'")or die($mysqli->error());
 
             //remove the mission from the table
-            $mission_delete = mysql_query("DELETE FROM missions_table WHERE mission_id='$mission_id'") or die(mysql_error());
+            $mission_delete = $mysqli->query("DELETE FROM missions_table WHERE mission_id='$mission_id'") or die($mysqli->error());
 
-            if (mysql_affected_rows() > 0) {
+            if ($mission_delete->affected_rows > 0) {
                 array_push($return_array, "Success");
                 array_push($return_array, "Mission updated to player data and removed");
             } else {

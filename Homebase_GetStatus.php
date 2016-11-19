@@ -4,10 +4,10 @@ $return_array = array();
 
 if (isset($_POST['id'])){
     $id = protect($_POST['id']);
-    $query1 = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
+    $query1 = $mysqli->query("SELECT * FROM homebase_sheet WHERE id='$id'") or die($mysqli->error());
 
-    if (mysql_num_rows($query1) == 1 ) {
-        $row = mysql_fetch_assoc($query1);
+    if ($query1->num_rows == 1 ) {
+        $row = $query1->fetch_assoc();
         $supply = $row['supply'];
         // $knife_for_pickup = $row['knife_for_pickup'];
         // $club_for_pickup = $row['club_for_pickup'];

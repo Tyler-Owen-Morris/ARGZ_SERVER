@@ -7,9 +7,9 @@ $id = isset($_POST['id']) ? protect($_POST['id']) : '';
 
 if($id <> '') {
     //client has verified the player's range to their home- we just need to get all survivors and set the curr_stam = max_stam
-    $survivor_update = mysql_query("UPDATE survivor_roster SET curr_stam=base_stam WHERE owner_id='$id'") or die(mysql_error());
+    $survivor_update = $mysqli->query("UPDATE survivor_roster SET curr_stam=base_stam WHERE owner_id='$id'") or die($mysqli->error());
 
-    if (mysql_affected_rows() > 0) {
+    if ($survivor_update->affected_rows > 0) {
         array_push($return_array, "Success");
         array_push($return_array, "All survivors stamina set to maximum");
     }

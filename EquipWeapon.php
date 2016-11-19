@@ -10,14 +10,14 @@ if(isset($_POST["id"])) {
             $weapon_id = protect($_POST["weapon_id"]);
 
             //find the weapon to be equipped
-            $weapon_query = mysql_query("SELECT * FROM active_weapons WHERE weapon_id='$weapon_id' AND owner_id='$owner_id'") or die(mysql_error());
+            $weapon_query = $mysqli->query("SELECT * FROM active_weapons WHERE weapon_id='$weapon_id' AND owner_id='$owner_id'") or die($mysqli->error());
             //find the survivor equipping the weapon
-            $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$owner_id'") or die(mysql_error());
+            $survivor_query = $mysqli->query("SELECT * FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$owner_id'") or die($mysqli->error());
 
             //verify there is only one of these weapons
-            if (mysql_num_rows($weapon_query) > 0 && mysql_num_rows($weapon_query) < 2) {
-                $row = mysql_fetch_assoc($weapon_query);
-                $row2 = mysql_fetch_assoc($survivor_query);
+            if ($weapon_query->num_rows > 0 && $weapon_query->num_rows < 2) {
+                $row = $weapon_query->fetch_assoc();
+                $row2 = $survivor_query->fetch_assoc();
                 //find out if someone is already holding this weapon, or the survivor already has a different weapon.
                 $equipped_survivor_id = $row['equipped_id'];
                 $previous_equipped_weapon_id = $row2['weapon_equipped'];
@@ -26,28 +26,28 @@ if(isset($_POST["id"])) {
                 $rec_unequips=0;
                 if ($equipped_survivor_id > 0) {
                     //Set the survivor to unequipped.
-                    $unequip_old_survivor_update = mysql_query("UPDATE survivor_roster SET weapon_equipped=0 WHERE owner_id='$owner_id' AND entry_id='$equipped_survivor_id'") or die(mysql_error());
-                    if (mysql_affected_rows()>0) {
+                    $unequip_old_survivor_update = $mysqli->query("UPDATE survivor_roster SET weapon_equipped=0 WHERE owner_id='$owner_id' AND entry_id='$equipped_survivor_id'") or die($mysqli->error());
+                    if ($unequip_old_survivor_update->affected_rows >0) {
                         $rec_unequips++;
                     }
                 }
                 //check for a previously equipped weapon on the survivor
                 if ($previous_equipped_weapon_id > 0) {
                     //set the weapon to unequipped.
-                    $unequip_old_weapon_update = mysql_query("UPDATE active_weapons SET equipped_id=0 WHERE owner_id='$owner_id' AND weapon_id='$previous_equipped_weapon_id'") or die(mysql_query());
-                    if (mysql_affected_rows()>0) {
+                    $unequip_old_weapon_update = $mysqli->query("UPDATE active_weapons SET equipped_id=0 WHERE owner_id='$owner_id' AND weapon_id='$previous_equipped_weapon_id'") or die($mysqli->query());
+                    if ($unequip_old_weapon_update->affected_rows >0) {
                         $rec_unequips++;
                     }
                 }
 
                 //update the weapon to it's new survivor
-                $new_weapon_update = mysql_query("UPDATE active_weapons SET equipped_id='$survivor_id' WHERE owner_id='$owner_id' AND weapon_id='$weapon_id'") or die(mysql_error());
+                $new_weapon_update = $mysqli->query("UPDATE active_weapons SET equipped_id='$survivor_id' WHERE owner_id='$owner_id' AND weapon_id='$weapon_id'") or die($mysqli->error());
                 
-                if (mysql_affected_rows() > 0) {
+                if ($mysqli->affected_rows > 0) {
                     
                     //update the survivor record.
-                    $survivor_update = mysql_query("UPDATE survivor_roster SET weapon_equipped='$weapon_id' WHERE owner_id='$owner_id' AND entry_id='$survivor_id'") or die(mysql_error());
-                    if (mysql_affected_rows() > 0) {
+                    $survivor_update = $mysqli->query("UPDATE survivor_roster SET weapon_equipped='$weapon_id' WHERE owner_id='$owner_id' AND entry_id='$survivor_id'") or die($mysqli->error());
+                    if ($mysqli->affected_rows > 0) {
                         array_push($return_array, "Success");
                         array_push($return_array, "Weapon successfully equipped");
                     }else {

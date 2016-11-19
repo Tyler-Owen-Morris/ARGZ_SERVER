@@ -14,18 +14,18 @@ if ($id <> '') {
             $start = 'NOW()';
             $interval_string = "interval 24 hour";
             //find out if this player has added this homebase already
-            $existing_query = mysql_query("SELECT * FROM outpost_sheet WHERE owner_id='$id' AND homebase_owner_id='$homebase_owner_id'") or die(mysql_error());
-            if(mysql_affected_rows($existing_query) > 0) {
+            $existing_query = $mysqli->query("SELECT * FROM outpost_sheet WHERE owner_id='$id' AND homebase_owner_id='$homebase_owner_id'") or die($mysqli->error());
+            if($existing_query->affected_rows > 0) {
                 //update the existing entry
                 $update_query = "UPDATE outpost_sheet SET expire_time=date_add($start, $interval_string), outpost_lat='$outpost_lat', outpost_lng='$outpost_lng' WHERE owner_id='$id' AND homebase_owner_id='$homebase_owner_id'";
-                $update_outpost = mysql_query($update_query) or die(mysql_error());
+                $update_outpost = $mysqli->query($update_query) or die($mysqli->error());
             } else {
                 //create a new entry
                 $insert_query = "INSERT INTO outpost_sheet (owner_id, outpost_lat, outpost_lng, expire_time, capacity, homebase_owner_id) VALUES ('$id', '$outpost_lat', '$outpost_lng', date_add($start, $interval_string), 0, '$homebase_owner_id')";
-                $insert_outpost = mysql_query($insert_query) or die(mysql_error());
+                $insert_outpost = $mysqli->query($insert_query) or die($mysqli->error());
             }
 
-            if (mysql_affected_rows() > 0 ) {
+            if ($mysqli->affected_rows > 0 ) {
                 array_push($return_array, "Success");
                 array_push($return_array, "Homebase successfullly added as a 24hr player outpost");
             }
