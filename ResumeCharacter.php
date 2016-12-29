@@ -1,32 +1,4 @@
 <?php
-//ResumeCharacter.php
-    $login = 1;
-    include ("db_connect.php");
-
-    $updateqry = "UPDATE player_sheet SET login_ts=now() WHERE id = '$id'";
-    $mysqli->query($updateqry);    
-    $usrqry = "SELECT * FROM player_sheet WHERE id = '$id'";
-    $userdata = $mysqli->query($usrqry);
-    
-    $rows = $userdata->num_rows;
-    if($rows == 0) {
-        array_push($return_array, "User has not started a character");
-        echo json_encode($return_array, JSON_NUMERIC_CHECK);
-    }
-    if($rows > 1) {
-        array_push($return_array, "More than one entry for the same user");
-        echo json_encode($return_array, JSON_NUMERIC_CHECK);
-    }
-    if($rows == 1) {
-        $return_array = array();
-        array_push($return_array, "Success");
-        array_push($return_array, $userdata->fetch_assoc());
-        echo json_encode($return_array, JSON_NUMERIC_CHECK);
-    }
-?>
-
-<?php
-    /*
     include ("db_connect.php");
 
     if (isset($_POST['id'])) {
@@ -61,5 +33,4 @@
     } else {
         echo "player ID not set";
     }
-    */
 ?>

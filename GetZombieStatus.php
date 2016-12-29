@@ -1,11 +1,11 @@
 <?php
 include("db_connect.php");
 $return_array = array();
-$player_query = $mysqli->query("SELECT * FROM player_sheet WHERE id='$id'") or die($mysqli->error());
-$player_data = $player_query->fetch_assoc();
+$player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
+$player_data = mysql_fetch_assoc($player_query);
 $zombie_status = $player_data['isZombie'];
 
-if ($mysqli->affected_rows > 0) {
+if (mysql_affected_rows() > 0) {
     array_push ($return_array, "Success");
     array_push($return_array, $zombie_status);
     array_push($return_array, $player_data);

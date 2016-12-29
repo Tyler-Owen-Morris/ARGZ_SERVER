@@ -9,29 +9,29 @@ $stam_regen = isset($_POST['stam_regen']) ? protect($_POST['stam_regen']) : '';
 if ($id <> '') {
     if ($stam_regen <> '') {
         //Get all of the survivors that belong to the player
-        $survivor_query = $mysqli->query("SELECT * FROM survivor_roster WHERE owner_id='$id'") or die($mysqli->error());
+        $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id='$id'") or die(mysql_error());
         $survivor_array = array();
         //Loop through them for survivors w/o full stamina
-        while ($survivor_data = $survivor_query->fetch_assoc()) {
+        while ($survivor_data = mysql_fetch_assoc($survivor_query)) {
             $max_stam = $survivor_data['base_stam'];
             $curr_stam = $survivor_data['curr_stam'];
             $entry_id = $survivor_data['entry_id'];
             //if the survivor is not full.
             if ($curr_stam < $max_stam) {
                 if ($curr_stam+$stam_regen > $max_stam) {
-                    $update = $mysqli->query("UPDATE survivor_roster SET curr_stam=base_stam WHERE entry_id='$entry_id' AND owner_id='$id'") or die($mysqli->error());
+                    $update = mysql_query("UPDATE survivor_roster SET curr_stam=base_stam WHERE entry_id='$entry_id' AND owner_id='$id'") or die(mysql_error());
                     array_push($survivor_array, $entry_id);
                 } else {
                     $new_stam= $curr_stam+$stam_regen;
-                    $update = $mysqli->query("UPDATE survivor_roster SET curr_stam='$new_stam' WHERE entry_id='$entry_id' AND owner_id='$id'") or die($mysqli->error());
+                    $update = mysql_query("UPDATE survivor_roster SET curr_stam='$new_stam' WHERE entry_id='$entry_id' AND owner_id='$id'") or die(mysql_error());
                     array_push($survivor_array, $entry_id);
                 }
             }
         }
 		
-		$player_update = $mysqli->query("UPDATE player_sheet SET last_stamina_regen=NOW() WHERE id='$id'") or die($mysqli->error());
+		$player_update = mysql_query("UPDATE player_sheet SET last_stamina_regen=NOW() WHERE id='$id'") or die(mysql_query());
 		
-		if ($mysqli->affected_rows > 0){
+		if (mysql_affected_rows()>0){
 			array_push($returnArray, "Success");
         	array_push($returnArray, "Stamina successfully added to characters");
         	array_push($returnArray, $survivor_array);

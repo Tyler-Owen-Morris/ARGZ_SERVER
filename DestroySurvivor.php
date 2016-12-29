@@ -8,16 +8,16 @@ $survivor_id = isset($_POST['survivor_id']) ? protect($_POST['survivor_id']) : '
 if ($id <> ''){
     if ($survivor_id <> '') {
         //find the team member's team position'
-        $surv_query = $mysqli->query("SELECT * FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id'") or die($mysqli->error());
-        $row = $surv_query->fetch_assoc();
+        $surv_query = mysql_query("SELECT * FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id'") or die(mysql_error());
+        $row = mysql_fetch_assoc($surv_query);
         $team_pos = $row['team_position'];
         //update 1 survivor, with team position 0 to the old teammember's position
-        $update_replacement = $mysqli->query("UPDATE survivor_roster SET team_position='$team_pos' WHERE owner_id='$id' AND team_position=0 LIMIT 1");
+        $update_replacement = mysql_query("UPDATE survivor_roster SET team_position='$team_pos' WHERE owner_id='$id' AND team_position=0 LIMIT 1");
 
         //remove the dead survivor
-        $delete = $mysqli->query("DELETE FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die($mysqli->error());
+        $delete = mysql_query("DELETE FROM survivor_roster WHERE entry_id='$survivor_id' AND owner_id='$id' LIMIT 1") or die(mysql_error());
 
-        if ($mysqli->affected_rows > 0) {
+        if (mysql_affected_rows() > 0) {
             array_push($return_array, "Success");
             array_push($return_array, "Survivor record was removed");
         } else {

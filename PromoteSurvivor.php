@@ -8,9 +8,9 @@ if (isset($_POST['id'])) {
         $survivor_id = protect($_POST['survivor_id']);
         //find the existing survivor at position 4, and everyone below that
        
-        $update_pos = $mysqli->query("UPDATE survivor_roster SET team_position=team_position-1 WHERE owner_id='$id' AND team_position < 5 AND team_position > 0") or die($mysqli->query());
+        $update_pos = mysql_query("UPDATE survivor_roster SET team_position=team_position-1 WHERE owner_id='$id' AND team_position < 5 AND team_position > 0") or die(mysql_query());
         
-        $promotion_query = $mysqli->query("UPDATE survivor_roster SET team_position=4 WHERE entry_id='$survivor_id' AND owner_id='$id'") or die($mysqli->error());
+        $promotion_query = mysql_query("UPDATE survivor_roster SET team_position=4 WHERE entry_id='$survivor_id' AND owner_id='$id'") or die(mysql_error());
         
         array_push($return_array, "Success");
         array_push($return_array, "Survivor positions successfully updated");

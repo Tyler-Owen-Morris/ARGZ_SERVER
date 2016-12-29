@@ -13,7 +13,7 @@ while ($result = mysql_fetch_assoc($query1)) {
 
     if ($active == '1') {
         //if the entry is active check to expire it
-        $query2 = mysql_query("SELECT * FROM weapon_crafting WHERE time_complete < DATE_SUB(NOW(), INTERVAL $duration MINUTE) AND id='$id' AND entry_id='$entry_id'") or die(mysql_error());
+        $query2 = mysql_query("SELECT * FROM weapon_crafting WHERE time_started < DATE_SUB(NOW(), INTERVAL $duration MINUTE) AND id='$id' AND entry_id='$entry_id'") or die(mysql_error());
 
         if (mysql_num_rows($query2) > 0) {
             //entry must be deleted, and added to the homebase_sheet

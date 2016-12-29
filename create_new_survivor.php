@@ -32,7 +32,7 @@ $returnArray = array();
         echo $json_return;
     } else {
         //create new entry on the DB
-        $insert = $mysqli->query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, profile_pic_url) VALUES ('$id', '$name', '$base_stam', '$curr_stam', '$base_attk', '$wep_equipped', 1, NOW(), '$team_pos', '$pic_url')") or die($mysqli->error());
+        $insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, profile_pic_url) VALUES ('$id', '$name', '$base_stam', '$curr_stam', '$base_attk', '$wep_equipped', 1, NOW(), '$team_pos', '$pic_url')") or die(mysql_error());
         array_push($returnArray, "Success");
         array_push($returnArray, "Character successfully added to server");
         $json_return = json_encode($returnArray);

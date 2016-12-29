@@ -42,7 +42,7 @@ if ($id <> '') {
                     $now = 'now()';
                     $interval_string = "interval $duration minute";
 
-                    $mission_insert = $mysqli->query("INSERT INTO missions_table (
+                    $mission_insert = mysql_query("INSERT INTO missions_table (
                         owner_id, building_id, building_name,
                         survivor1_id, survivor1_curr_stam, survivor1_dead,
                         survivor2_id, survivor2_curr_stam, survivor2_dead,
@@ -59,27 +59,27 @@ if ($id <> '') {
                         '$survivor4_id', '$survivor4_curr_stam', '$survivor4_dead',
                         '$survivor5_id', '$survivor5_curr_stam', '$survivor5_dead',
                         '$supply_found', '$water_found', '$food_found',
-                        date_add($now, $interval_string), '$duration', '$ammo_used')") or die($mysqli->error());
+                        date_add($now, $interval_string), '$duration', '$ammo_used')") or die(mysql_error());
 
                     //update the survivor records to set the "on_mission" boolean to true
-                    $surv1_update = $mysqli->query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor1_dead' WHERE owner_id='$id' AND entry_id='$survivor1_id'") or die($mysqli->error());
-                    $surv2_update = $mysqli->query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor2_dead' WHERE owner_id='$id' AND entry_id='$survivor2_id'") or die($mysqli->error());
-                    $surv3_update = $mysqli->query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor3_dead' WHERE owner_id='$id' AND entry_id='$survivor3_id'") or die($mysqli->error());
-                    $surv4_update = $mysqli->query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor4_dead' WHERE owner_id='$id' AND entry_id='$survivor4_id'") or die($mysqli->error());
-                    $surv5_update = $mysqli->query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor5_dead' WHERE owner_id='$id' AND entry_id='$survivor5_id'") or die($mysqli->error());
+                    $surv1_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor1_dead' WHERE owner_id='$id' AND entry_id='$survivor1_id'") or die(mysql_error());
+                    $surv2_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor2_dead' WHERE owner_id='$id' AND entry_id='$survivor2_id'") or die(mysql_error());
+                    $surv3_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor3_dead' WHERE owner_id='$id' AND entry_id='$survivor3_id'") or die(mysql_error());
+                    $surv4_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor4_dead' WHERE owner_id='$id' AND entry_id='$survivor4_id'") or die(mysql_error());
+                    $surv5_update = mysql_query("UPDATE survivor_roster SET onMission=1 AND dead='$survivor5_dead' WHERE owner_id='$id' AND entry_id='$survivor5_id'") or die(mysql_error());
 
                     //attempt to update the building entry
                     $now = 'now()';
                     $interval_string1 = "interval $duration minute";
-                    $building_update = $mysqli->query("UPDATE cleared_buildings SET active=0, time_cleared=date_add($now, $interval_string1), supply=supply-$supply_found, food=food-$food_found, water=water-$water_found WHERE id='$id' AND bldg_id='$building_id'") or die($mysqli->error());
-                    if($mysqli->affected_rows > 0) {
+                    $building_update = mysql_query("UPDATE cleared_buildings SET active=0, time_cleared=date_add($now, $interval_string1), supply=supply-$supply_found, food=food-$food_found, water=water-$water_found WHERE id='$id' AND bldg_id='$building_id'") or die(mysql_error());
+                    if(mysql_affected_rows() > 0) {
                         array_push($return_array, "Success");
                         array_push($return_array, "Mission added, and building set to inactive.");
                     } else {
                         //insert the entry
-                        $building_insert = $mysqli->query("INSERT INTO cleared_buildings (id, bldg_name, bldg_id, active, time_cleared) VALUES ('$id', '$building_name', '$building_id', 0, date_add($now, $interval_string1))") or die($mysqli->error());
+                        $building_insert = mysql_query("INSERT INTO cleared_buildings (id, bldg_name, bldg_id, active, time_cleared) VALUES ('$id', '$building_name', '$building_id', 0, date_add($now, $interval_string1))") or die(mysql_error());
 
-                        if ($mysqli->affected_rows > 0) {
+                        if (mysql_affected_rows() > 0) {
                             array_push($return_array, "Success");
                             array_push($return_array, "Mission added, and building set to inactive.");
                         } else {

@@ -8,7 +8,7 @@ if (!$con) {
     array_push($return_array, "connection to SQL server failed");
     die(json_encode($return_array, JSON_NUMERIC_CHECK));
 }
-$db = mysql_select_db("ARGZ_DEV_DB",$con);
+$db = mysql_select_db("ARGZ_LIVE_DB",$con);
 if (!$db) {
     array_push($return_array, "error connecting to database");
     die(json_encode($return_array, JSON_NUMERIC_CHECK));
@@ -54,7 +54,9 @@ if($login_ts == "12/31/1999 11:59:59") {
 
 $userdata = mysql_query($usrqry);
 if (mysql_num_rows($userdata) == 0) {
-    array_push($return_array, "Invalid Login Check");
+    array_push($return_array, "Invalid Login CheckLIVE");
+    array_push($return_array, "splat....");
+    array_push($return_array, $usrqry);
     die(json_encode($return_array, JSON_NUMERIC_CHECK));
 }
 

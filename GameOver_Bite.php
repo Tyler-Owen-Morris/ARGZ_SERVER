@@ -9,20 +9,20 @@ $gameover_datetime = isset($_POST['game_over_datetime']) ? protect($_POST['game_
 if ($id <> '') {
     //update the zombie status, and gameover timestamp- and IF this is new high score, set that.
     if ($high_score == '') {
-        $player_update = $mysqli->query("UPDATE player_sheet SET (isZombie, game_over_datetime) VALUES (1, '$gameover_datetime') WHERE id='$id'") or die($mysqli->error());
+        $player_update = mysql_query("UPDATE player_sheet SET (isZombie, game_over_datetime) VALUES (1, '$gameover_datetime') WHERE id='$id'") or die(mysql_error());
     } else {
-        $player_update = $mysqli->query("UPDATE player_sheet SET (isZombie, game_over_datetime, high_score) VALUES (1, '$gameover_datetime', '$high_score') WHERE id='$id'") or die($mysqli->error());
+        $player_update = mysql_query("UPDATE player_sheet SET (isZombie, game_over_datetime, high_score) VALUES (1, '$gameover_datetime', '$high_score') WHERE id='$id'") or die(mysql_error());
     }
-    if ($player_update->affected_rows>0) {
+    if (mysql_affected_rows()) {
         array_push($return_array, "Success");
         //handle the zombie high score
-        $player_query = $mysqli->query("SELECT * FROM player_sheet WHERE id='$id'") or die($mysqli->error());
-        $player_data = $player_query->fetch_assoc();
+        $player_query = mysql_query("SELECT * FROM player_sheet WHERE id='$id'") or die(mysql_error());
+        $player_data = mysql_fetch_assoc($player_query);
 
         $zombie_kills = $player_data['zombies_killed'];
         $zombie_highscore = $player_data['zombies_killed_high_score'];
         if ($zombie_kills > $zombie_highscore) {
-            $zombie_update = $mysqli->query("UPDATE player_sheet SET zombies_killed_high_score='$zombie_kills' WHERE id='$id'") or die($mysqli->error());
+            $zombie_update = mysql_query("UPDATE player_sheet SET zombies_killed_high_score='$zombie_kills' WHERE id='$id'") or die(mysql_error());
             array_push($return_array, $zombie_kills);
         } else {
             array_push($return_array, 0);

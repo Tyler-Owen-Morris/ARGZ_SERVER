@@ -4,11 +4,11 @@
     $return_array = array();
 
     $bldgquery = "SELECT * FROM cleared_buildings WHERE id = '$id'";
-    $bldgData = $mysqli->query($bldgquery) or die($mysqli->error());
+    $bldgData = mysql_query($bldgquery) or die(mysql_error());
     
     
-    if ($bldgData->num_rows > 0 ) {
-        array_push($return_array, $bldgData->fetch_assoc());
+    if (mysql_num_rows($bldgData) > 0 ) {
+        array_push($return_array, mysql_fetch_assoc($bldgData));
     } else {
         array_push($return_array, null);
     }

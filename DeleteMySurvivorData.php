@@ -6,7 +6,7 @@ if (isset($_POST['id'])){
     $id = protect($_POST['id']);
         
     $usrqry = "DELETE FROM survivor_roster WHERE '$id' = owner_id";
-    $survivordata = $mysqli->query($usrqry) or die($mysqli->error);
+    $survivordata = mysql_query($usrqry) or die(mysql_error);
     echo $survivordata;
 
 } else {
