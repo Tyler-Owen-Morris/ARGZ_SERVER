@@ -27,6 +27,7 @@ if (isset($_POST['id'])) {
                 $weapon_modifier = $weapon_data['modifier'];
                 $weapon_base_dmg = $weapon_data['base_dmg'];
                 $weapon_durability = $weapon_data['durability'];
+				$weapon_miss_chance = $weapon_data['miss_chance'];
                 $weapon_stam_cost = $weapon_data['stam_cost'];
 
                 $weapon_string += " found expired: "+$wep_name;
@@ -34,10 +35,11 @@ if (isset($_POST['id'])) {
                 //create the crafted weapon into active inventory
                 //check if we need to add ammo or an actual weapon
             
-                $insert = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability) values ('$id', 0, '$weapon_name', '$weapon_type', '$weapon_stam_cost', '$weapon_base_dmg', '$weapon_modifier', '$weapon_durability')") or die(mysql_error());
+                $insert = mysql_query("INSERT INTO active_weapons (owner_id, equipped_id, name, type, stam_cost, base_dmg, modifier, durability, max_durability, miss_chance) values ('$id', 0, '$weapon_name', '$weapon_type', '$weapon_stam_cost', '$weapon_base_dmg', '$weapon_modifier', '$weapon_durability', '$weapon_durability', '$weapon_miss_chance')") or die(mysql_error());
                 $weapon_string += " creating weapon record";
 				
-			} else {
+			} else if ($index==0) {
+				//handle building items
 				if ($wep_type == "trap"){
 					$trap_update  = mysql_query("UPDATE player_sheet SET trap=trap+1 WHERE id='$id'") or die(mysql_error());
 				} else if ($wep_type == "barrel") {
@@ -49,7 +51,16 @@ if (isset($_POST['id'])) {
                 	$ammo_update = mysql_query("UPDATE player_sheet SET ammo=ammo+5 WHERE id = '$id'") or 		die(mysql_error());
                 	$weapon_string += " adding ammo";
 				}
-            }
+            } else if ($index==-1){
+				//handle tiered items
+				if($wep_type=="workbench"){
+					$workbench_update = mysql_query("UPDATE homebase_sheet SET craft_t1=1 WHERE id='$id'") or die(mysql_error());
+				}else if ($wep_type == "forge"){
+					$forge_update = mysql_query("UPDATE homebase_sheet SET craft_t2=1 WHERE id='$id'") or die(mysql_error());
+				}else if ($wep_type=="lathe"){
+					$lathe_update = mysql_query("UPDATE homebase_sheet SET craft_t3=1 WHERE id='$id'") or die(mysql_error());
+				}
+			}
            
 
             //remove the expired entry from the crafting database
@@ -70,7 +81,7 @@ if (isset($_POST['id'])) {
             $transfered_wood = $row2['wood'];
 			$transfered_metal = $row2['metal'];
 
-            if ($transfered_supply >= 0) {
+            if ($transfered_wood >= 0 || $transfered_metal >0) {
                 //create the insert queries to update both tables
                 $update = mysql_query("UPDATE homebase_sheet SET wood=wood+$transfered_wood, metal=metal+$transfered_metal WHERE id='$id'") or die(mysql_error()); 
                 $update = mysql_query("UPDATE player_sheet SET wood = 0, metal=0 WHERE id='$id'") or die(mysql_error());

@@ -46,9 +46,11 @@ if (isset($_POST['id'])) {
             $homebase_array = array("id"=>$row2['id'], "supply"=>$row2['supply'], "knife_for_pickup"=>$row2['knife_for_pickup'], "club_for_pickup"=>$row2['club_for_pickup'], "ammo_for_pickup"=>$row2['ammo_for_pickup'], "gun_for_pickup"=>$row2['gun_for_pickup'], "active_survivor_for_pickup"=>$row2['active_survivor_for_pickup'], "inactive_survivors"=>$row2['inactive_survivors']);
 
             //construct and return the json package
+			$now = 'NOW()';
             array_push($return_array, "Success");
             array_push($return_array, "New homebase entry created");
             array_push($return_array, $homebase_array);
+			array_push($return_array, $now);
             $json_return = json_encode($return_array, JSON_NUMERIC_CHECK);
             echo $json_return;
         } else {

@@ -25,7 +25,7 @@ if (isset($_POST['id'])) {
                 //there is no entry for this players homebase
                 $query2 = mysql_query("SELECT * FROM player_sheet WHERE id='$id'");
                 $user_data = mysql_fetch_assoc($query2);
-                $insert1 = mysql_query("INSERT INTO homebase_sheet (id, supply, knife_for_pickup, club_for_pickup, ammo_for_pickup, gun_for_pickup, active_survivor_for_pickup, inactive_survivors) VALUES ('$id', 0, 0, 0, 0, 0, 0, 0)") or die(mysql_error());
+                $insert1 = mysql_query("INSERT INTO homebase_sheet (id, wood, metal ) VALUES ('$id', 0, 0)") or die(mysql_error());
                 array_push($retunArray, "Success");
                 array_push($returnArray, "Player homebase location updated, and homebase has been initialized");
             } else if (mysql_num_rows($query1) > 1) {
@@ -35,7 +35,7 @@ if (isset($_POST['id'])) {
                 
             }
 
-            $jsonReturn = json_encode($returnArray);
+            $jsonReturn = json_encode($returnArray, JSON_NUMERIC_CHECK);
             echo $jsonReturn;
 
         }else{echo("Longitude not set");}

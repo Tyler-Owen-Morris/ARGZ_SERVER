@@ -50,9 +50,15 @@ if ($id <> ''){
 			array_push($return_array, "Failed");
 			array_push($return_array, "no matching type found");
 		}
+		
+		//push the updated cleared building data onto the end of the return array
 		$final_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id'") or die(mysql_error());
-		$final_array = mysql_fetch_assoc($final_query);
-		array_push($return_array, $final_array);
+		$cleared_bldg_data_array = array();
+		while ($data = mysql_fetch_assoc($final_query)){
+			array_push($cleared_bldg_data_array, $data);
+		}
+		
+		array_push($return_array, $cleared_bldg_data_array);
 	}else{
 		array_push($return_array, "Failed");
 		array_push($return_array, "incomplete send");
@@ -62,7 +68,7 @@ if ($id <> ''){
     array_push($return_array, "Failed");
     array_push($return_array, "Player ID not set");
 }
-$jsonreturn = json_encode($return_array);
+$jsonreturn = json_encode($return_array, JSON_NUMERIC_CHECK);
 echo $jsonreturn;
 //PlaceGear.php
 ?>

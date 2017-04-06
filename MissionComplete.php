@@ -91,19 +91,20 @@ if ($id <> '') {
             }
 
             //player stat updates
-            $supply = $row['supply_found'];
+            $wood = $row['wood'];
+			$metal = $row['metal'];
             $water = $row['water_found'];
             $food = $row['food_found'];
             $ammo_used = $row['ammo_used'];
 
-            $player_update = mysql_query("UPDATE player_sheet SET supply=supply+$supply, water=water+$water, food=food+$food, ammo=ammo-$ammo_used WHERE id='$id'")or die(mysql_error());
+            $player_update = mysql_query("UPDATE player_sheet SET wood=wood+$wood, metal=metal+$metal, water=water+$water, food=food+$food, ammo=ammo-$ammo_used WHERE id='$id'")or die(mysql_error());
 
             //remove the mission from the table
             $mission_delete = mysql_query("DELETE FROM missions_table WHERE mission_id='$mission_id'") or die(mysql_error());
             
             
 
-            if (mysql_affected_rows() > 0) {
+            if (mysql_affected_rows()) {
             	$new_mission_query = mysql_query("SELECT * FROM missions_table WHERE owner_id='$id'") or die(mysql_error());
             	$new_mission_data = mysql_fetch_assoc($new_mission_query);
             

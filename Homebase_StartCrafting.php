@@ -5,7 +5,8 @@ $return_array = array();
 
 $id = isset($_POST['id']) ? protect($_POST['id']) : '';
 $wep_name = isset($_POST['wep_name']) ? protect($_POST['wep_name']) : '';
-$cost = isset($_POST['cost']) ? protect($_POST['cost']) : '';
+$wd_cost = isset($_POST['wood_cost']) ? protect($_POST['wood_cost']) : '';
+$mt_cost = isset($_POST['metal_cost']) ? protect($_POST['metal_cost']) : '';
 $duration = isset($_POST['duration']) ? protect($_POST['duration']) : '';
 $index = isset($_POST['weapon_index']) ? protect($_POST['weapon_index']) : '';
 
@@ -21,7 +22,7 @@ if ($id <> '') {
     //  $duration = $row['duration'];
 
     //Subtract the cost from the homebase_sheet
-    $update1 = mysql_query("UPDATE homebase_sheet SET supply = supply - $cost WHERE id='$id' AND supply >= $cost") or die(mysql_error());
+    $update1 = mysql_query("UPDATE homebase_sheet SET wood=wood - $wd_cost, metal=metal-$mt_cost WHERE id='$id' AND wood >= $wd_cost AND metal >= $mt_cost") or die(mysql_error());
     if(mysql_affected_rows() > 0) {
         $start = 'now()'; // simply use the mysql function
 

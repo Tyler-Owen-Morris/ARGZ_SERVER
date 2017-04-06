@@ -37,7 +37,7 @@ if (isset($_POST['id'])){
         $status_array = array("supply" => $supply);
 
         array_push($return_array, "Success");
-        array_push($return_array, $status_array);
+        array_push($return_array, $row);
         $jsonReturn = json_encode($return_array, JSON_NUMERIC_CHECK);
         echo $jsonReturn;
     } else {

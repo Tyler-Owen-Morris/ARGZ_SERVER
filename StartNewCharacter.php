@@ -10,7 +10,10 @@ if(isset($_POST['id'])){
     $profile_pic_url = protect($_POST['profile_pic_url']);
     $homebase_set_time = protect($_POST['homebase_set_time']);
     
-    $supply = protect($_POST['supply']);
+    //$supply = protect($_POST['supply']);
+	
+	$wood = protect($_POST['wood']);
+	$metal = protect($_POST['metal']);
     $water = protect($_POST['water']);
     $food = protect($_POST['food']);
     
@@ -36,7 +39,7 @@ if(isset($_POST['id'])){
         }
 
         //if the id is already registered, it should just overwrite the new character data into that acccount.
-        $update1 = mysql_query("UPDATE player_sheet SET first_name = '$first_name', last_name = '$last_name', homebase_set_time = '$homebase_set_time', homebase_lat = 0.0, homebase_lon = 0.0, supply = '$supply', food = '$food', water = '$water', char_created_DateTime = NOW(), game_over_datetime= '', ammo = '$ammo', equipped_weapon_id = '0', curr_stamina = '$stamina', max_stamina= '$stamina', meals=0, isZombie=0, zombies_killed=0, zombies_killed_high_score='$Z_HS' WHERE id = '$id'")or die(mysql_error());
+        $update1 = mysql_query("UPDATE player_sheet SET first_name = '$first_name', last_name = '$last_name', homebase_set_time = '$homebase_set_time', homebase_lat = 0.0, homebase_lon = 0.0, wood='$wood', metal='$metal', food = '$food', water = '$water', char_created_DateTime = NOW(), game_over_datetime= '', ammo = '$ammo', equipped_weapon_id = '0', curr_stamina = '$stamina', max_stamina= '$stamina', meals=0, isZombie=0, zombies_killed=0, zombies_killed_high_score='$Z_HS' WHERE id = '$id'")or die(mysql_error());
     
         //DELETE ALL OTHER ACTIVE PLAYER DATA IN ALL OTHER TABLES.
 
@@ -52,7 +55,7 @@ if(isset($_POST['id'])){
         //4) if there is a homebase, reset all data for homebase_sheet
         $home_query = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
         if (mysql_num_rows($home_query) > 0 ) {
-            $update2 = mysql_query("UPDATE homebase_sheet SET supply=0, knife_for_pickup=0, club_for_pickup=0, ammo_for_pickup=0, gun_for_pickup=0, active_survivor_for_pickup=0, inactive_survivors=0 WHERE id = '$id'") or die(mysql_error());
+            $update2 = mysql_query("UPDATE homebase_sheet SET wood=0, metal=0, craft_t1=0, craft_t2=0, craft_t3=0 WHERE id = '$id'") or die(mysql_error());
         }
 
         //5) Remove all cleared buildings from the cleared_buildings table
@@ -89,7 +92,7 @@ if(isset($_POST['id'])){
         //4) if there is a homebase, reset all data for homebase_sheet
         $home_query = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
         if (mysql_num_rows($home_query) > 0 ) {
-            $update2 = mysql_query("UPDATE homebase_sheet SET supply=0, knife_for_pickup=0, club_for_pickup=0, ammo_for_pickup=0, gun_for_pickup=0, active_survivor_for_pickup=0, inactive_survivor=0 WHERE id = '$id'") or die(mysql_error());
+            $update2 = mysql_query("UPDATE homebase_sheet SET wood=0, metal=0, craft_t1=0, craft_t2=0, craft_t3=0 WHERE id = '$id'") or die(mysql_error());
         }
 
         //5) Remove all cleared buildings from the cleared_buildings table

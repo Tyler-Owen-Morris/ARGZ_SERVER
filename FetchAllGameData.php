@@ -28,11 +28,15 @@
             if (($food_count <= $survivor_count*-12) || ($water_count <= $survivor_count*-8)) {
                 if($survivor_count > 0) {
                     $survivor_count--;
-                    var_dump($survivor_count);
+                    //var_dump($survivor_count);
                     $who_to_kill_query = mysql_query("SELECT entry_id FROM survivor_roster WHERE owner_id='$id' AND dead=0 ORDER BY entry_id DESC LIMIT 1") or die(mysql_error());
                     $who_to_kill_data = mysql_fetch_assoc($who_to_kill_query);
-                    $entry_id = $who_to_kill_data["entry_id"];
-                    $death_query = mysql_query("UPDATE survivor_roster SET dead=1 WHERE owner_id='$id' AND entry_id='$entry_id'") or die(mysql_error());
+                    $entry_id = $who_to_kill_data["entry_id"]; 
+					
+					$abandon_query = mysql_query("UPDATE survivor_roster SET abandoned=1, isActive=0 WHERE owner_id='$id' AND entry_id='$entry_id'") or die(mysql_error()); 
+					//players no longer "die" immediately- they now leave you.
+                    //$death_query = mysql_query("UPDATE survivor_roster SET dead=1 WHERE owner_id='$id' AND entry_id='$entry_id'") or die(mysql_error());
+					
                 } else {
                     $ima_zombie = 1;
                     $total_meals = $total_meals - $meals_to_process;
@@ -43,8 +47,8 @@
         }
 
         //update the new player food/water values w/ minimums
-        if($food_count < $survivor_count * -12) $food_count = $survivor_count * -12;
-        if($water_count < $survivor_count * -8) $water_count = $survivor_count * -8;
+        if($food_count < $survivor_count * -12) $food_count = $survivor_count * -12; //track negative food values to 3 days X 4 meals a day- after that survivors abandon you
+        if($water_count < $survivor_count * -8) $water_count = $survivor_count * -8; //track negative water values to 2 days X 4 units of water/day- abandonment follows
 
         //update the new food and water values to the player sheet.
         if ($game_over_score_hrs == 0) {
@@ -216,6 +220,18 @@
         $death_data_array = null;
     }
 
+	//wall data
+	$day_string = "interval 24 hour";
+	$wall_query = mysql_query("SELECT * FROM wall_tags WHERE player_id='$id' AND tag_time>date_sub(NOW(), $day_string)") or die(mysql_error());
+	$wall_array = array();
+	if (mysql_num_rows($wall_query)>0){
+		while($wall = mysql_fetch_assoc($wall_query)) {
+			array_push($wall_array, $wall);
+		}
+	}else{
+		$wall_array=null;
+	}
+
     //assemble the array
     array_push($return_array, "Success");
     array_push($return_array, $player_data_array);
@@ -226,7 +242,10 @@
     array_push($return_array, $mission_data_array);
     array_push($return_array, $death_data_array);
     array_push($return_array, $active_injury_array);
-	array_push($return_array, $survivor_array);//this is actually stamina regenerated survivor array
+	array_push($return_array, $wall_array);
+
+	//this WAS in the 9 position, but I couldn't find where that was referenced in the client- bumping for wall data
+	//array_push($return_array, $survivor_array);//this is actually stamina regenerated survivor array
 
     echo json_encode($return_array, JSON_NUMERIC_CHECK);
 ?>

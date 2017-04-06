@@ -16,11 +16,11 @@ if(isset($_POST["id"])) {
 
             //verify there is only one of these weapons
             if (mysql_num_rows($weapon_query) > 0 && mysql_num_rows($weapon_query) < 2) {
-                $row = mysql_fetch_assoc($weapon_query);
-                $row2 = mysql_fetch_assoc($survivor_query);
+                $weapon_data = mysql_fetch_assoc($weapon_query);
+                $survivor_data = mysql_fetch_assoc($survivor_query);
                 //find out if someone is already holding this weapon, or the survivor already has a different weapon.
-                $equipped_survivor_id = $row['equipped_id'];
-                $previous_equipped_weapon_id = $row2['weapon_equipped'];
+                $equipped_survivor_id = $weapon_data['equipped_id'];
+                $previous_equipped_weapon_id = $survivor_data['weapon_equipped'];
 
                 //this checks if the weapon already belongs to another survivor.
                 $rec_unequips=0;

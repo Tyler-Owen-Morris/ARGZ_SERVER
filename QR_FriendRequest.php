@@ -19,9 +19,9 @@ if ($request_id <> '') {
     $accepting_player_data = mysql_query("SELECT * FROM player_sheet WHERE id='$accept_id'") or die(mysql_error());
     $requesting_player_data = mysql_query("SELECT * FROM player_sheet WHERE id='$request_id'") or die(mysql_error());
 
-    //This is a lookup to find matching currently paired players
-    $QR_query1 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$request_id' AND id_2='$accept_id'")or die(mysql_error());
-    $QR_query2 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$accept_id' AND id_2='$request_id'")or die(mysql_error());
+    //This is a lookup to find an existing record for this pairing.
+    $QR_query1 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$request_id' AND id_2='$accept_id' ")or die(mysql_error());
+    $QR_query2 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$accept_id' AND id_2='$request_id' ")or die(mysql_error());
 
     if (mysql_num_rows($QR_query1) > 0 || mysql_num_rows($QR_query2) > 0) {
         //these players have paired before
@@ -37,7 +37,7 @@ if ($request_id <> '') {
         }
         $scan_id = $pairing_data['scan_id'];
         $interval_string = "interval 12 hour";
-        $pairing_update = mysql_query("UPDATE qr_pairs SET pair_ts=now(), pairing_count=pairing_count+1 WHERE scan_id='$scan_id' AND pair_ts<date_sub(NOW(), $interval_string)") or die(mysql_error());
+        $pairing_update = mysql_query("UPDATE qr_pairs SET pair_ts=now(), pairing_count=pairing_count+1 WHERE scan_id='$scan_id' AND pair_ts<date_sub(NOW(), $interval_string)") or die(mysql_error()); //if the scan was within the last 12hrs it's too recent- invalid pairing
 
         if (mysql_affected_rows() > 0) {
             //successful pairing!
@@ -52,7 +52,7 @@ if ($request_id <> '') {
                 $MS_YG_data = mysql_fetch_assoc($MS_YG_accepting_query);
                 $new_stam = $MS_YG_data['base_stam']+10;
                 $new_attk = $MS_YG_data['base_attack']+1;
-                $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error());
+                $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET dead=0, base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error()); //dead=0 should ressurect the player.
             } else {
                 //insert the accepting survivor onto the requesting players survivor roster
                 $surv_name = $accepting_survivor_data['name'];
@@ -67,7 +67,7 @@ if ($request_id <> '') {
                 $MS_YG_data = mysql_fetch_assoc($MS_YG_requesting_query);
                 $new_stam = $MS_YG_data['base_stam']+10;
                 $new_attk = $MS_YG_data['base_attack']+1;
-                $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
+                $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET dead=0,  base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
             } else {
                 //insert the requesting survivor onto the accepting players survivor roster
                 $surv_name = $requesting_survivor_data['name'];
@@ -78,8 +78,8 @@ if ($request_id <> '') {
             }
 
             //update player_sheet with resource bonus
-            $accepting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
-            $requesting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error()); 
+            $accepting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
+            $requesting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error()); 
 
            ;
             array_push($returnArray, $requesting_survivor_data);
@@ -111,7 +111,7 @@ if ($request_id <> '') {
             $MS_YG_data = mysql_fetch_assoc($MS_YG_accepting_query);
             $new_stam = $MS_YG_data['base_stam']+10;
             $new_attk = $MS_YG_data['base_attack']+1;
-            $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error());
+            $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET dead=0, base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$request_id' AND paired_user_id='$accept_id'") or die(mysql_error());
         } else {
             //insert the accepting survivor onto the requesting players survivor roster
             $surv_name = $accepting_survivor_data['name'];
@@ -131,7 +131,7 @@ if ($request_id <> '') {
             $MS_YG_data = mysql_fetch_assoc($MS_YG_requesting_query);
             $new_stam = $MS_YG_data['base_stam']+10;
             $new_attk = $MS_YG_data['base_attack']+1;
-            $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
+            $MS_YG_update_query = mysql_query("UPDATE survivor_roster SET dead=0, base_stam='$new_stam', curr_stam='$new_stam', base_attack='$new_attk' WHERE owner_id='$accept_id' AND paired_user_id='$request_id'") or die(mysql_error());
         } else {
             //insert the requesting survivor onto the accepting players survivor roster
             $surv_name = $requesting_survivor_data['name'];
@@ -147,8 +147,8 @@ if ($request_id <> '') {
         }
 
         //update player_sheet with resource bonus
-        $accepting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
-        $requesting_player_update = mysql_query("UPDATE player_sheet SET supply=supply+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error());
+        $accepting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
+        $requesting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error());
 
         array_push($returnArray, $requesting_survivor_data);
     }
