@@ -18,6 +18,9 @@ if ($request_id <> '') {
     //find the player data
     $accepting_player_data = mysql_query("SELECT * FROM player_sheet WHERE id='$accept_id'") or die(mysql_error());
     $requesting_player_data = mysql_query("SELECT * FROM player_sheet WHERE id='$request_id'") or die(mysql_error());
+    //store the status of their first scan- 1 is not the first time, and 0 is the first time.
+    $accepter_first_scan = $accepting_player_data["first_scan"];
+    $requesting_first_scan = $requesting_player_data["first_scan"];
 
     //This is a lookup to find an existing record for this pairing.
     $QR_query1 = mysql_query("SELECT * FROM qr_pairs WHERE id_1='$request_id' AND id_2='$accept_id' ")or die(mysql_error());
@@ -77,9 +80,9 @@ if ($request_id <> '') {
                 $requesting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$accept_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$request_id', '$pic_url')") or die(mysql_error());
             }
 
-            //update player_sheet with resource bonus
-            $accepting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
-            $requesting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error()); 
+            //update player_sheet with resource bonus and confirm first scan
+            $accepting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10, first_scan=1 WHERE id='$accept_id'") or die(mysql_error());
+            $requesting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10, first_scan=1 WHERE id='$request_id'") or die(mysql_error()); 
 
            ;
             array_push($returnArray, $requesting_survivor_data);
@@ -146,12 +149,59 @@ if ($request_id <> '') {
             die(json_encode($returnArray));
         }
 
-        //update player_sheet with resource bonus
-        $accepting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$accept_id'") or die(mysql_error());
-        $requesting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10 WHERE id='$request_id'") or die(mysql_error());
+        //if this is a players first player find- reset their "time started" to 2 days ago.
+        $interval_2days = "interval 2 day";
+        if ($accepter_first_scan==0){
+            $accepter_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime= date_sub(NOW(), $interval_2days) WHERE id='$accept_id'") or die(mysql_error());
+        }
+        if($requesting_first_scan==0){
+            $requesting_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime = date_sub(NOW(), $interval_2days) WHERE id='$request_id'") or die(mysql_error());
+        }
 
-        array_push($returnArray, $requesting_survivor_data);
-    }
+        //update player_sheet with resource bonus
+        $accepting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10, first_scan=1 WHERE id='$accept_id'") or die(mysql_error());
+        $requesting_player_update = mysql_query("UPDATE player_sheet SET wood=wood+25, metal=metal+25, food=food+10, water=water+10, first_scan=1 WHERE id='$request_id'") or die(mysql_error());
+
+        //***** Fetch Updated return data ****
+
+        //survivor data
+        //First get team. Correct is missing team members...
+        $team_pos = 5;
+        $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' AND team_position > 0 ORDER BY team_position DESC") or die(mysql_error());
+        $survivor_data_array = array();
+        $survivor_count = mysql_num_rows($survivor_query);
+        if (mysql_num_rows($survivor_query) > 0) {
+            while ($survivor = mysql_fetch_assoc($survivor_query)) {
+                if($survivor['team_position'] != $team_pos) {
+                    $survivor['team_position'] = $team_pos;
+                    mysql_query("UPDATE survivor_roster SET team_position=".$survivor['team_position']." WHERE entry_id=".$survivor['entry_id']) or die(mysql_error());
+                }
+                array_push($survivor_data_array, $survivor);
+                $team_pos--;
+            }
+            if($team_pos > 0) {
+                $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' AND team_position = 0 AND onMission = 0 LIMIT $team_pos") or die(mysql_error());
+                while ($survivor = mysql_fetch_assoc($survivor_query)) {
+                    $survivor['team_position'] = $team_pos;
+                    mysql_query("UPDATE survivor_roster SET team_position=".$survivor['team_position']." WHERE entry_id=".$survivor['entry_id']);
+                    array_push($survivor_data_array, $survivor);
+                    $team_pos--;
+                }
+            }
+        }
+        //Select everyone else...
+        $survivor_query = mysql_query("SELECT * FROM survivor_roster WHERE owner_id = '$id' AND team_position = 0 ORDER BY onMission ASC") or die(mysql_error());
+        $survivor_count += mysql_num_rows($survivor_query);
+        if (mysql_num_rows($survivor_query) > 0)
+            while ($survivor = mysql_fetch_assoc($survivor_query))
+                array_push($survivor_data_array, $survivor);
+
+        if($survivor_count == 0)
+            $survivor_data_array = null;
+        }
+
+        array_push($return_array, $requesting_survivor_data);
+        array_push($return_array, $survivor_data_array);
 
 } else {
     array_push($returnArray, "Failed");
