@@ -19,7 +19,7 @@ if(isset($_POST['id'])){
     
     $ammo = protect($_POST['ammo']);
     
-    $stamina = 100;
+    $stamina = 300;
     $attack = 15;
     $home_lat = 0.0;
     $home_lon = 0.0;
