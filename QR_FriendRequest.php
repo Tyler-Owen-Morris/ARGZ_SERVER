@@ -152,10 +152,10 @@ if ($request_id <> '') {
         //if this is a players first player find- reset their "time started" to 2 days ago.
         $interval_2days = "interval 2 day";
         if ($accepter_first_scan==0){
-            $accepter_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime= date_sub(NOW(), $interval_2days) WHERE id='$accept_id'") or die(mysql_error());
+            $accepter_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime= date_sub(NOW(), $interval_2days) meals=8 WHERE id='$accept_id'") or die(mysql_error()); //meals must be set to match the clock
         }
         if($requesting_first_scan==0){
-            $requesting_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime = date_sub(NOW(), $interval_2days) WHERE id='$request_id'") or die(mysql_error());
+            $requesting_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime = date_sub(NOW(), $interval_2days) , meals=8 WHERE id='$request_id'") or die(mysql_error());
         }
 
         //update player_sheet with resource bonus

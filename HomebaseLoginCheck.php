@@ -38,12 +38,16 @@ if (isset($_POST['id'])) {
             //if there is a player, but no homebase entry- we want to create a new homebase entry now.
             $row = mysql_fetch_assoc($query2);
             $inactive_survivors = ($row['total_survivors'] - $row['active_survivors']);
-            $insert1 = mysql_query("INSERT INTO homebase_sheet (id, supply, knife_for_pickup, club_for_pickup, ammo_for_pickup, gun_for_pickup, active_survivor_for_pickup, inactive_survivors) VALUES ('$id', 0, 0, 0, 0, 0, 0, '$inactive_survivors')")or die(mysql_error());
+            $insert1 = mysql_query("INSERT INTO homebase_sheet 
+                (id) 
+                VALUES 
+                ('$id')")or die(mysql_error());
 
             //create an array of the game data to return to the client in the json.
             $query3 = mysql_query ("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
-            $row2 = mysql_fetch_assoc($query3);
-            $homebase_array = array("id"=>$row2['id'], "supply"=>$row2['supply'], "knife_for_pickup"=>$row2['knife_for_pickup'], "club_for_pickup"=>$row2['club_for_pickup'], "ammo_for_pickup"=>$row2['ammo_for_pickup'], "gun_for_pickup"=>$row2['gun_for_pickup'], "active_survivor_for_pickup"=>$row2['active_survivor_for_pickup'], "inactive_survivors"=>$row2['inactive_survivors']);
+            $homebase_array = mysql_fetch_assoc($query3);
+            //$homebase_array = array("id"=>$row2['id'], "supply"=>$row2['supply'], "knife_for_pickup"=>$row2['knife_for_pickup'], "club_for_pickup"=>$row2['club_for_pickup'], "ammo_for_pickup"=>$row2['ammo_for_pickup'], "gun_for_pickup"=>$row2['gun_for_pickup'], "active_survivor_for_pickup"=>$row2['active_survivor_for_pickup'], "inactive_survivors"=>$row2['inactive_survivors']);
+            
 
             //construct and return the json package
 			$now = 'NOW()';

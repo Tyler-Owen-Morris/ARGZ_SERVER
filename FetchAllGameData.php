@@ -232,6 +232,17 @@
 		$wall_array=null;
 	}
 
+    //baited building data
+    $baited_query = mysql_query("SELECT * FROM baited_buildings WHERE owner_id='$id'") or die(mysql_error());
+    $baited_array = array();
+    if (mysql_num_rows($baited_query) > 0) {
+        while ($bait = mysql_fetch_assoc($baited_query)){
+            array_push($baited_array, $bait);
+        }
+    }else{
+        $baited_array = null;
+    }
+
     //assemble the array
     array_push($return_array, "Success");
     array_push($return_array, $player_data_array);
@@ -243,6 +254,7 @@
     array_push($return_array, $death_data_array);
     array_push($return_array, $active_injury_array);
 	array_push($return_array, $wall_array);
+    array_push($return_array, $baited_array);
 
 	//this WAS in the 9 position, but I couldn't find where that was referenced in the client- bumping for wall data
 	//array_push($return_array, $survivor_array);//this is actually stamina regenerated survivor array

@@ -39,7 +39,19 @@ if(isset($_POST['id'])){
         }
 
         //if the id is already registered, it should just overwrite the new character data into that acccount.
-        $update1 = mysql_query("UPDATE player_sheet SET first_name = '$first_name', last_name = '$last_name', homebase_set_time = '$homebase_set_time', homebase_lat = 0.0, homebase_lon = 0.0, wood='$wood', metal='$metal', food = '$food', water = '$water', char_created_DateTime = NOW(), game_over_datetime= '', ammo = '$ammo', equipped_weapon_id = '0', curr_stamina = '$stamina', max_stamina= '$stamina', meals=0, isZombie=0, zombies_killed=0, zombies_killed_high_score='$Z_HS' WHERE id = '$id'")or die(mysql_error());
+        $update1 = mysql_query("UPDATE player_sheet SET 
+            first_name = '$first_name', 
+            last_name = '$last_name', 
+            homebase_set_time = '$homebase_set_time', 
+            homebase_lat = 0.0, homebase_lon = 0.0, 
+            wood='$wood', metal='$metal', food = '$food', water = '$water', 
+            char_created_DateTime = NOW(), game_over_datetime= '', 
+            ammo = '$ammo', 
+            equipped_weapon_id = '0', 
+            curr_stamina = '$stamina', max_stamina= '$stamina', 
+            meals=0, isZombie=0, zombies_killed=0, brains=0, zm_hordeCount=0,
+            zombies_killed_high_score='$Z_HS' 
+        WHERE id = '$id'")or die(mysql_error());
     
         //DELETE ALL OTHER ACTIVE PLAYER DATA IN ALL OTHER TABLES.
 
@@ -66,6 +78,9 @@ if(isset($_POST['id'])){
 
         //7) Remove all outposts -- THESE ARE NOW PURCHASE POINTS, THEY EXIST ACROSS GAMES
         //$delete6 = mysql_query("DELETE FROM outpost_sheet WHERE owner_id='$id'") or die(mysql_error());
+
+        //8) remove all baited buildings
+        $delete8 = mysql_query("DELETE FROM baited_buildings WHERE owner_id='$id'") or die(mysql_error());
 
         //After DELTES are complete- create the survivor entry for the player character at team position 5
         $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$id', '$name', '$stamina', '$stamina', '$attack', '0', '1', NOW(), '5', '$id', '$profile_pic_url')") or die(mysql_error());
@@ -103,6 +118,9 @@ if(isset($_POST['id'])){
 
          //7) Remove all outposts -- THESE ARE NOW PURCHASE POINTS, THEY PERSIST ACROSS GAMES
         //$delete6 = mysql_query("DELETE FROM outpost_sheet WHERE owner_id='$id'") or die(mysql_error());
+
+        //8) remove all baited buildings
+        $delete8 = mysql_query("DELETE FROM baited_buildings WHERE owner_id='$id'") or die(mysql_error());
 
          //After DELTES are complete- create the survivor entry for the player character at team position 5
         $insert2 = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, weapon_equipped, isActive, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$id', '$name', '$stamina', '$stamina', '$attack', '0', '1', NOW(), '5', '$id', '$profile_pic_url')") or die(mysql_error());
