@@ -20,7 +20,7 @@ if ($id <> '') {
 		$bldg_water = 0;
 		
         //find the matching building entry
-        $existing_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_name='$bldg_name'") or die(mysql_error());
+        $existing_query = mysql_query("SELECT * FROM cleared_buildings WHERE id='$id' AND bldg_id='$bldg_id'") or die(mysql_error());
 
         if (mysql_num_rows($existing_query) > 0) {
             //store the supplies and loot timer

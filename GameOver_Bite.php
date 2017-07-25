@@ -9,9 +9,9 @@ $gameover_datetime = isset($_POST['game_over_datetime']) ? protect($_POST['game_
 if ($id <> '') {
     //update the zombie status, and gameover timestamp- and IF this is new high score, set that.
     if ($high_score == '') {
-        $player_update = mysql_query("UPDATE player_sheet SET (isZombie, game_over_datetime) VALUES (1, '$gameover_datetime') WHERE id='$id'") or die(mysql_error());
+        $player_update = mysql_query("UPDATE player_sheet SET isZombie=1, game_over_datetime='$gameover_datetime' VALUES WHERE id='$id'") or die(mysql_error());
     } else {
-        $player_update = mysql_query("UPDATE player_sheet SET (isZombie, game_over_datetime, high_score) VALUES (1, '$gameover_datetime', '$high_score') WHERE id='$id'") or die(mysql_error());
+        $player_update = mysql_query("UPDATE player_sheet SET isZombie=1, game_over_datetime='$gameover_datetime', high_score='$high_score' WHERE id='$id'") or die(mysql_error());
     }
     if (mysql_affected_rows()) {
         array_push($return_array, "Success");
