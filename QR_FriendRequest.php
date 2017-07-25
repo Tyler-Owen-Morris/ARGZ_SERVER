@@ -96,7 +96,7 @@ if ($request_id <> '') {
         //these players have not paired before
         
         //create the QR pairing record
-        $QR_insert = mysql_query("INSERT INTO qr_pairs (id_1, id_2, pair_ts, pairing_count) VALUES ('$accept_id', '$request_id', NOW(), 1)") or die(mysql_error());
+        $QR_insert = mysql_query("INSERT INTO qr_pairs id_1='$accept_id', id_2='$request_id', pair_ts=NOW(), pairing_count=1") or die(mysql_error());
         if (mysql_affected_rows() >0) {
             array_push($returnArray, "Success");
         } else {
@@ -121,7 +121,7 @@ if ($request_id <> '') {
             $surv_stam = $accepting_survivor_data['base_stam'];
             $surv_attk = $accepting_survivor_data['base_attack'];
             $pic_url = $accepting_survivor_data['profile_pic_url'];
-            $accepting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$request_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$accept_id', '$pic_url')") or die(mysql_error());
+            $accepting_survivor_insert = mysql_query("INSERT INTO survivor_roster owner_id='$id', name='$surv_name', base_stam='$surv_stam', curr_stam='$surv_stam', base_attack='$surv_attk', isActive=1, injured=0, dead=0, onMission=0, start_time=NOW(), team_position=0, paired_user_id='$accept_id', profile_pic_url='$pic_url'") or die(mysql_error());
         }
         if (mysql_affected_rows() < 1) {
             array_push($returnArray, "Failed");
@@ -141,7 +141,7 @@ if ($request_id <> '') {
             $surv_stam = $requesting_survivor_data['base_stam'];
             $surv_attk = $requesting_survivor_data['base_attack'];
             $pic_url = $requesting_survivor_data['profile_pic_url'];
-            $requesting_survivor_insert = mysql_query("INSERT INTO survivor_roster (owner_id, name, base_stam, curr_stam, base_attack, isActive, injured, dead, onMission, start_time, team_position, paired_user_id, profile_pic_url) VALUES ('$accept_id', '$surv_name', '$surv_stam', '$surv_stam', '$surv_attk', 1, 0, 0, 0, NOW(), 0, '$request_id', '$pic_url')") or die(mysql_error());
+            $requesting_survivor_insert = mysql_query("INSERT INTO survivor_roster owner_id='$accept_id', name='$surv_name', base_stam='$surv_stam', curr_stam='$surv_stam', base_attack='$surv_attk', isActive=1, injured=0, dead=0, onMission=0, start_time=NOW(), team_position=0, paired_user_id='$request_id', profile_pic_url='$pic_url'") or die(mysql_error());
         }
         if (mysql_affected_rows() < 1) {
             array_push($returnArray, "Failed");
@@ -152,7 +152,7 @@ if ($request_id <> '') {
         //if this is a players first player find- reset their "time started" to 2 days ago.
         $interval_2days = "interval 2 day";
         if ($accepter_first_scan==0){
-            $accepter_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime= date_sub(NOW(), $interval_2days) meals=8 WHERE id='$accept_id'") or die(mysql_error()); //meals must be set to match the clock
+            $accepter_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime= date_sub(NOW(), $interval_2days) , meals=8 WHERE id='$accept_id'") or die(mysql_error()); //meals must be set to match the clock
         }
         if($requesting_first_scan==0){
             $requesting_start_update = mysql_query("UPDATE player_sheet SET char_created_DateTime = date_sub(NOW(), $interval_2days) , meals=8 WHERE id='$request_id'") or die(mysql_error());
