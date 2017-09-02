@@ -63,6 +63,17 @@ if(isset($_POST['id'])){
 
         //3) remove all weapons from weapon_crafting
         $delete3 = mysql_query("DELETE FROM weapon_crafting WHERE id='$id'") or die(mysql_error());
+		
+		//add base set of building items
+		$trap = "trap";
+		$barrel = "barrel";
+		$greenhouse = "greenhouse";
+		$item_insert1 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$trap', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert2 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$trap', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert3 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$trap', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert4 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$barrel', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert1 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$greenhouse', 0, NOW(), 0)") or die(mysql_error());
+		
 
         //4) if there is a homebase, reset all data for homebase_sheet
         $home_query = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
@@ -103,6 +114,16 @@ if(isset($_POST['id'])){
 
         //3) remove all weapons from weapon_crafting
         $delete3 = mysql_query("DELETE FROM weapon_crafting WHERE id='$id'") or die(mysql_error());
+		
+		//add base set of building items
+		$trap = "trap";
+		$barrel = "barrel";
+		$greenhouse = "greenhouse";
+		$item_insert1 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$trap', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert2 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$trap', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert3 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$trap', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert4 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$barrel', 0, NOW(), 0)") or die(mysql_error());
+		$item_insert1 = mysql_query("INSERT INTO weapon_crafting (id, type, duration, time_complete, weapon_index) VALUES ('$id','$greenhouse', 0, NOW(), 0)") or die(mysql_error());
 
         //4) if there is a homebase, reset all data for homebase_sheet
         $home_query = mysql_query("SELECT * FROM homebase_sheet WHERE id='$id'") or die(mysql_error());
