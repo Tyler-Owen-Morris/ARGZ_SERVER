@@ -96,7 +96,7 @@ if ($request_id <> '') {
         //these players have not paired before
         
         //create the QR pairing record
-        $QR_insert = mysql_query("INSERT INTO qr_pairs id_1='$accept_id', id_2='$request_id', pair_ts=NOW(), pairing_count=1") or die(mysql_error());
+        $QR_insert = mysql_query("INSERT INTO qr_pairs (id_1, id_2, pair_ts, pairing_count) VALUES ('$accept_id', '$request_id', NOW(), 1)") or die(mysql_error());
         if (mysql_affected_rows() >0) {
             array_push($returnArray, "Success");
         } else {
